@@ -1,0 +1,52 @@
+{
+	"action": "action",
+	"timestamp": "timestamp",
+	"sourceApp": "sourceApp",
+	"isStage": "isStage",
+	"userId": "userId",
+	"userName": "userName",
+	"productInfo": {
+		"Products": {
+			"Product": {
+				"MarketingProduct": {
+					"Categories": {
+						"ProductCategory": [{}, {}
+						]
+					},
+					"Family": {},
+					"ProductFilters": {
+						"ProductFilter": [{}, {}
+						]
+					},
+					"Segment": {
+						"Groups": {
+							"B2BSegmentGroup": {}
+						}
+					},
+					"EquipmentType": {}
+				},
+				"Regions": {
+					"Region": [{
+							"ExternalRegionMappings": {
+								"ExternalRegionMapping": [{}, {}
+								]
+							}
+						}, {}
+					]
+				},
+				"Modifiers": {
+					"ProductModifier": [{}, {}
+					]
+				},
+				"ProductWebEntities": {
+					"ProductWebEntity": [{
+							"WebEntity": {}
+						}, {
+							"WebEntity": {}
+						}
+					]
+				}
+			}
+		}
+	}
+}

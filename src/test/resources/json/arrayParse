@@ -1,0 +1,22 @@
+[{
+ 	"action": "testAction1",
+ 	"timestamp": "",
+ 	"sourceApp": "testApp",
+ 	"isStage": "",
+ 	"userId": "",
+ 	"userName": "",
+ 	"productInfo": {
+ 		"name": "test"
+ 	}
+ },
+ {
+ 	"action": "testAction2",
+ 	"timestamp": "",
+ 	"sourceApp": "testApp",
+ 	"isStage": "",
+ 	"userId": "",
+ 	"userName": "",
+ 	"productInfo": {
+ 		"name": "test"
+ 	}
+}]

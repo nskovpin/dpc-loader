@@ -1,0 +1,86 @@
+"action":
+"timestamp":
+"sourceApp":
+"isStage":
+"userId":
+"userName":
+"productInfo": {
+	"Products": {
+		"Product": {
+			Параметры продукта
+			"MarketingProduct": {
+				Параметры маркетингового продукта,
+				"Categories": {
+					"ProductCategory"[{
+							Категория 1
+						}, {
+							Категория 2
+						},
+						…
+					]
+				},
+				"Family": {
+					Параметры семейства
+				},
+				"ProductFilters": {
+					"ProductFilter": [{
+							Параметры фильтра по продукту1
+						}, {
+							Параметры фильтра по продукту2
+						},
+						…
+					]
+				},
+				"Segment": {
+					Направление B2B
+					"Groups": {
+						"B2BSegmentGroup": {
+							Группа направлений B2B
+						}
+					}
+				},
+				"EquipmentType": {
+					Тип оборудования
+				}
+			},
+			"Regions": {
+				"Region": [{
+						Регион 1,
+						"ExternalRegionMappings": {
+							"ExternalRegionMapping": [{
+									Параметры ExternalRegion 1(например, MarketCode или InacId)
+								}{
+									Параметры ExternalRegion 2
+								}
+							]
+						}
+					}, {
+						Регион 2,
+						 - //-
+					},
+					…
+				]
+			},
+			"Modifiers": {
+				"ProductModifier": [{
+						Параметры модификатора 1
+					}, {
+						Параметры модификатора 2
+					},
+					…
+				]
+			},
+			"ProductWebEntities": {
+				"ProductWebEntity": [
+					"WebEntity": {
+						Параметры WebEntity 1
+					},
+					"WebEntity": {
+						Параметры WebEntity 2
+					},
+					…
+				]
+			}
+		}
+	}
+}
