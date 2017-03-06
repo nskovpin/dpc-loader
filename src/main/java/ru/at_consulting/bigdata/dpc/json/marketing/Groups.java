@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class Groups {
 
-    @JsonProperty
+    @JsonProperty(value = "B2BSegmentGroup")
     private B2BSegmentGroup b2BSegmentGroup;
 
 }

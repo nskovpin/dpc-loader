@@ -21,16 +21,16 @@ public class Product {
     @JsonProperty
     private String type;
 
-    @JsonProperty
+    @JsonProperty(value = "MarketingProduct")
     private MarketingProduct marketingProduct;
 
-    @JsonProperty
+    @JsonProperty(value = "Regions")
     private Regions regions;
 
-    @JsonProperty
+    @JsonProperty(value = "Modifiers")
     private Modifiers modifiers;
 
-    @JsonProperty
+    @JsonProperty(value = "ProductWebEntities")
     private ProductWebEntities productWebEntities;
 
 }

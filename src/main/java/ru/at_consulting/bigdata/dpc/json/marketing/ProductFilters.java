@@ -13,6 +13,6 @@ import java.util.List;
 @Setter
 public class ProductFilters {
 
-    @JsonProperty
+    @JsonProperty(value = "ProductFilter")
     private List<ProductFilter> productFilter;
 }

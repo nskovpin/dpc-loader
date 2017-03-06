@@ -5,33 +5,75 @@
 	"isStage": "isStage",
 	"userId": "userId",
 	"userName": "userName",
-	"productInfo": {
+	"ProductInfo": {
 		"Products": {
 			"Product": {
+				"id": "ProductId",
+				"type": "ProductTitle",
 				"MarketingProduct": {
+					"id": "marketingId",
+					"title": "marketingTitle",
+					"productType": "productType",
+					"paymentSystem": "paymentSystem",
 					"Categories": {
-						"ProductCategory": [{}, {}
+						"ProductCategory": [{
+								"title": "ProductCategoryTitle1"
+							}, {
+								"title": "ProductCategoryTitle2"
+							}
 						]
 					},
-					"Family": {},
+					"Family": {
+						"title": "FamilyTitle"
+					},
 					"ProductFilters": {
-						"ProductFilter": [{}, {}
+						"ProductFilter": [{
+								"title": "ProductFilterTitle1"
+							}, {
+								"title": "ProductFilterTitle2"
+							}
 						]
 					},
 					"Segment": {
+						"title": "SegmentTitle",
 						"Groups": {
-							"B2BSegmentGroup": {}
+							"B2BSegmentGroup": {
+								"title": "B2BSegmentGroupTitle"
+							}
 						}
 					},
-					"EquipmentType": {}
+					"EquipmentType": {
+						"title": "EquipmentTypeTitle"
+					}
 				},
 				"Regions": {
 					"Region": [{
+							"id": "RegionId1",
+							"title": "RegionTitle1",
 							"ExternalRegionMappings": {
-								"ExternalRegionMapping": [{}, {}
+								"ExternalRegionMapping": [{
+								"id": "ExternalRegionMappingId11",
+								"systemName": "externalSystemName11",
+								"value": "externalValue11"
+								}, {"id": "ExternalRegionMappingId12",
+								"systemName": "externalSystemName12",
+								"value": "externalValue12"}
 								]
 							}
-						}, {}
+						}, {
+							"id": "RegionId2",
+							"title": "RegionTitle2",
+							"ExternalRegionMappings": {
+								"ExternalRegionMapping": [{
+								"id": "ExternalRegionMappingId2",
+								"systemName": "externalSystemName2",
+								"value": "externalValue2"
+								}, {"id": "ExternalRegionMappingId22",
+								"systemName": "externalSystemName22",
+								"value": "externalValue22"}
+								]
+							}
+						}
 					]
 				},
 				"Modifiers": {
@@ -40,9 +82,11 @@
 				},
 				"ProductWebEntities": {
 					"ProductWebEntity": [{
-							"WebEntity": {}
+							"WebEntity": { "id": "WebEntity1Id",
+							"title": "WebEntity1Title"}
 						}, {
-							"WebEntity": {}
+							"WebEntity": {"id": "WebEntity2Id",
+							"title": "WebEntity2Title"}
 						}
 					]
 				}

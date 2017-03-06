@@ -8,21 +8,12 @@ allprojects {
 
     sourceCompatibility = 1.7
 
-    repositories {
-
-        mavenCentral()
-        maven {
-            url 'http://packages.confluent.io/maven/'
-        }
-        maven {
-            url 'http://192.168.36.82:8081/nexus/content/repositories/hortonworks/'
-        }
-        maven {
-            url 'http://192.168.36.82:8081/nexus/content/repositories/releases/'
-        }
-    }
-
     ext {
+
+        urls = [
+                confluent: 'http://packages.confluent.io/maven/',
+                atc      : 'http://192.168.36.82:8081/nexus/content/repositories/'
+        ]
 
         vers = [
                 avro     : '1.7.7',
@@ -80,6 +71,20 @@ allprojects {
         ]
     }
 
+    repositories {
+
+        mavenCentral()
+        maven {
+            url urls.confluent
+        }
+        maven {
+            url urls.atc + 'hortonworks/'
+        }
+        maven {
+            url urls.atc + 'releases/'
+        }
+    }
+
     dependencies {
         compile "org.projectlombok:lombok:1.16.14"
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.5'
@@ -94,8 +99,8 @@ allprojects {
     }
 }
 
-task listJars(){
-    doLast{
+task listJars() {
+    doLast {
         configurations.compile.each { File file -> println file.name }
     }
 }
@@ -107,9 +112,22 @@ task fatJar(type: Jar) {
                 'Main-Class': 'com.mkyong.DateUtils'
     }
     baseName = project.name + '-all'
-    from { configurations.compile.collect {it} }
+    from { configurations.compile.collect { it } }
     into "libs"
     with jar
+}
+
+task printProperties {
+    doLast {
+        println deps.kafka.main
+        println deps.confluent.main
+        println urls.confluent
+    }
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.compile
+    into 'dependencies'
 }
 
 //task copyTestResources(type: Copy) {

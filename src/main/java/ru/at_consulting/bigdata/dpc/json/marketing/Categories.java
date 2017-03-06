@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 public class Categories {
 
-    @JsonProperty
+    @JsonProperty(value = "ProductCategory")
     private List<ProductCategory> ProductCategory;
 
 }

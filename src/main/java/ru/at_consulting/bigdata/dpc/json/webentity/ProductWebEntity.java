@@ -11,6 +11,6 @@ import lombok.Setter;
 @Setter
 public class ProductWebEntity {
 
-    @JsonProperty
+    @JsonProperty(value = "WebEntity")
     private WebEntity webEntity;
 }

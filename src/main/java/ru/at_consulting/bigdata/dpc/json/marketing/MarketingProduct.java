@@ -23,18 +23,18 @@ public class MarketingProduct {
     @JsonProperty
     private String paymentSystem;
 
-    @JsonProperty
+    @JsonProperty(value = "Categories")
     private Categories categories;
 
-    @JsonProperty
+    @JsonProperty(value = "Family")
     private Family family;
 
-    @JsonProperty
+    @JsonProperty(value = "ProductFilters")
     private ProductFilters productFilters;
 
-    @JsonProperty
+    @JsonProperty(value = "Segment")
     private Segment segment;
 
-    @JsonProperty
+    @JsonProperty(value = "EquipmentType")
     private EquipmentType equipmentType;
 }

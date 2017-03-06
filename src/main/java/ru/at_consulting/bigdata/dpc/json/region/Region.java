@@ -17,7 +17,7 @@ public class Region {
     @JsonProperty
     private String title;
 
-    @JsonProperty
+    @JsonProperty(value = "ExternalRegionMappings")
     private ExternalRegionMappings externalRegionMappings;
 
 }

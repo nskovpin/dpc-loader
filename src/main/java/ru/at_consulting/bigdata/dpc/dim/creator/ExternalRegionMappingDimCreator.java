@@ -32,6 +32,8 @@ public class ExternalRegionMappingDimCreator implements DimCreator<ExternalRegio
     public ExternalRegionMappingDim create(DpcRoot dpcRoot, ExternalRegionMapping parent) {
         ExternalRegionMappingDim externalRegionMappingDim = new ExternalRegionMappingDim();
         externalRegionMappingDim.setId(parent.getId());
+        externalRegionMappingDim.setSystemName(parent.getSystemName());
+        externalRegionMappingDim.setValue(parent.getValue());
         externalRegionMappingDim.setEffectiveDate(dpcRoot.getTimestamp());
         return externalRegionMappingDim;
     }

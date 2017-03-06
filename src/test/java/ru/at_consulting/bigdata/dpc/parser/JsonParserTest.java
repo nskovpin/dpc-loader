@@ -12,9 +12,8 @@ import ru.at_consulting.bigdata.dpc.loader.ParserJson;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.Collections;
 
 /**
  * Created by NSkovpin on 26.02.2017.
@@ -61,7 +60,13 @@ public class JsonParserTest {
 
         ParserJson parserJson = new ParserJson();
         ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
+
         Assert.assertTrue(parsedDimsHolder != null);
+        Assert.assertTrue(parsedDimsHolder.getMarketingProductDim() != null);
+
+        Path market = Paths.get(JsonParserTest.class.getResource("/parsed/" + "market").toURI());
+        String str = parsedDimsHolder.getMarketingProductDim().stringify();
+        Assert.assertTrue(str != null);
     }
 
 }

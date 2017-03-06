@@ -14,6 +14,6 @@ public class Segment {
     @JsonProperty
     private String title;
 
-    @JsonProperty
+    @JsonProperty(value = "Groups")
     private Groups groups;
 }

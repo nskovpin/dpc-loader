@@ -3,6 +3,7 @@ package ru.at_consulting.bigdata.dpc.dim.creator;
 import ru.at_consulting.bigdata.dpc.dim.WebEntityDim;
 import ru.at_consulting.bigdata.dpc.json.DpcRoot;
 import ru.at_consulting.bigdata.dpc.json.IterableChildren;
+import ru.at_consulting.bigdata.dpc.json.webentity.ProductWebEntity;
 import ru.at_consulting.bigdata.dpc.json.webentity.WebEntity;
 
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class WebEntityDimCreator implements DimCreator<WebEntityDim, WebEntity> 
         List<WebEntityDim> webEntityDimList = new ArrayList<>();
         List<?> children = holder.getChildren();
         for(Object child: children){
-            if(child instanceof WebEntity){
-                webEntityDimList.add(create(dpcRoot, (WebEntity) child));
+            if(child instanceof ProductWebEntity){
+                webEntityDimList.add(create(dpcRoot, ((ProductWebEntity) child).getWebEntity()));
             }
         }
         return webEntityDimList;

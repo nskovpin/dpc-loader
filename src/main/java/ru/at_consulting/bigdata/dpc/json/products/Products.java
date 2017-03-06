@@ -11,6 +11,6 @@ import lombok.Setter;
 @Setter
 public class Products {
 
-    @JsonProperty
+    @JsonProperty(value = "Product")
     private Product product;
 }

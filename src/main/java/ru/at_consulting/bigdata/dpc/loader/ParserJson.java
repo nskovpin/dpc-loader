@@ -30,19 +30,18 @@ import java.util.Map;
  */
 public class ParserJson {
 
-    private static Map<Class, DimCreator> creatorMap;
-
-    static {
+    public ParserJson(){
 
     }
 
-    public void parseSingleObject(InputStream inputStream, String outputFolder) throws IOException {
+    public void parseSingleObject(InputStream inputStream, Configuration configuration, String outputFolder) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         DpcRoot dpcRoot = mapper.readValue(inputStream, DpcRoot.class);
         ParsedDimsHolder parsedDimsHolder = parseDcpRoot(dpcRoot);
+        saveObject(parsedDimsHolder, configuration, outputFolder, false);
     }
 
-    public void parseArrayObject(InputStream inputStream, String outputFolder) throws IOException {
+    public void parseArrayObject(InputStream inputStream, Configuration configuration, String outputFolder) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonParser parser = mapper.getFactory().createParser(inputStream);
         if (parser.nextToken() != JsonToken.START_ARRAY) {
@@ -52,6 +51,7 @@ public class ParserJson {
             ObjectNode node = mapper.readTree(parser);
             DpcRoot dpcRoot = mapper.treeToValue(node, DpcRoot.class);
             ParsedDimsHolder parsedDimsHolder = parseDcpRoot(dpcRoot);
+            saveObject(parsedDimsHolder, configuration, outputFolder, true);
         }
         parser.close();
     }
@@ -60,7 +60,7 @@ public class ParserJson {
         ParsedDimsHolder parsedDimsHolder = new ParsedDimsHolder();
 
         if (dpcRoot.getProductInfo() != null && dpcRoot.getProductInfo().getProducts() != null &&
-                dpcRoot.getProductInfo().getProducts().getProduct() != null) {
+                dpcRoot.getProductInfo().getProducts().getProduct() != null && dpcRoot.getAction() != null) {
             DimCreator<ProductDim, Product> productCreator = DimCreatorFactory.getCreator(ProductDim.class);
             ProductDim productDim = productCreator.create(dpcRoot,
                     dpcRoot.getProductInfo().getProducts().getProduct());
@@ -140,44 +140,43 @@ public class ParserJson {
     }
 
 
-    private void saveObject(ParsedDimsHolder parsedDimsHolder, Configuration configuration, String outputFolder) throws IOException {
-        BufferedWriter bufferedWriter = getDimWriter(configuration, outputFolder, false, parsedDimsHolder.getProductDim());
+    private void saveObject(ParsedDimsHolder parsedDimsHolder, Configuration configuration, String outputFolder, boolean append) throws IOException {
+        BufferedWriter bufferedWriter = getDimWriter(configuration, outputFolder, append, parsedDimsHolder.getProductDim());
         HdfsWriter.writeLine(bufferedWriter, parsedDimsHolder.getProductDim().stringify());
         HdfsWriter.closeWriter(bufferedWriter);
         if (!parsedDimsHolder.isDelete()) {
             List<RegionDim> regionDimList = parsedDimsHolder.getRegionDimList();
-            BufferedWriter regionWriter = getDimWriter(configuration, outputFolder, false, RegionDim.class);
+            BufferedWriter regionWriter = getDimWriter(configuration, outputFolder, append, RegionDim.class);
             for (RegionDim regionDim : regionDimList) {
                 HdfsWriter.writeLine(regionWriter, regionDim.stringify());
             }
             HdfsWriter.closeWriter(regionWriter);
 
             List<ExternalRegionMappingDim> externalRegionMappingDimList = parsedDimsHolder.getExternalRegionMappingDimList();
-            BufferedWriter externalRegionMappingWriter = getDimWriter(configuration, outputFolder, false, ExternalRegionMappingDim.class);
+            BufferedWriter externalRegionMappingWriter = getDimWriter(configuration, outputFolder, append, ExternalRegionMappingDim.class);
             for (ExternalRegionMappingDim externalRegionMappingDim : externalRegionMappingDimList) {
                 HdfsWriter.writeLine(externalRegionMappingWriter, externalRegionMappingDim.stringify());
             }
             HdfsWriter.closeWriter(externalRegionMappingWriter);
 
             List<ProductRegionLinkDim> productRegionLinkDimList = parsedDimsHolder.getProductRegionLinkDimList();
-            BufferedWriter productRegionLinkWriter = getDimWriter(configuration, outputFolder, false, ProductRegionLinkDim.class);
+            BufferedWriter productRegionLinkWriter = getDimWriter(configuration, outputFolder, append, ProductRegionLinkDim.class);
             for (ProductRegionLinkDim productRegionLinkDim : productRegionLinkDimList) {
                 HdfsWriter.writeLine(productRegionLinkWriter, productRegionLinkDim.stringify());
             }
             HdfsWriter.closeWriter(productRegionLinkWriter);
 
             MarketingProductDim marketingProductDim = parsedDimsHolder.getMarketingProductDim();
-            BufferedWriter marketingProductWriter = getDimWriter(configuration, outputFolder, false, marketingProductDim);
+            BufferedWriter marketingProductWriter = getDimWriter(configuration, outputFolder, append, marketingProductDim);
             HdfsWriter.writeLine(marketingProductWriter, marketingProductDim.stringify());
             HdfsWriter.closeWriter(marketingProductWriter);
 
             List<WebEntityDim> webEntityDimList = parsedDimsHolder.getWebEntityDimList();
-            BufferedWriter webEntityDimWriter = getDimWriter(configuration, outputFolder, false, WebEntityDim.class);
+            BufferedWriter webEntityDimWriter = getDimWriter(configuration, outputFolder, append, WebEntityDim.class);
             for (WebEntityDim webEntityDim : webEntityDimList) {
                 HdfsWriter.writeLine(webEntityDimWriter, webEntityDim.stringify());
             }
             HdfsWriter.closeWriter(webEntityDimWriter);
-
         }
     }
 
@@ -220,7 +219,6 @@ public class ParserJson {
         private List<RegionDim> regionDimList;
 
         private List<ExternalRegionMappingDim> externalRegionMappingDimList;
-
     }
 
 

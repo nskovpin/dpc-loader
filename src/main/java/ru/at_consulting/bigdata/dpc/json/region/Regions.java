@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 public class Regions implements IterableChildren{
 
-    @JsonProperty
+    @JsonProperty(value = "Region")
     private List<Region> region;
 
     @Override

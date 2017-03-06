@@ -15,6 +15,6 @@ public class ProductInfo {
     @JsonProperty
     private String name;
 
-    @JsonIgnore
-    private Products Products;
+    @JsonProperty(value = "Products")
+    private Products products;
 }
