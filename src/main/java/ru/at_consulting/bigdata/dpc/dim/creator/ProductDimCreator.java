@@ -45,9 +45,11 @@ public class ProductDimCreator implements DimCreator<ProductDim, Product> {
             productDim.setMarketingProductId(parent.getMarketingProduct().getId());
         }
         Integer isArchive = 0;
-        for (ProductModifier modifier : parent.getModifiers().getProductModifier()) {
-            if (modifier.getAlias() != null) {
-                isArchive = modifier.getAlias().equals(DpcRoot.IS_ARCHIVE) ? 1 : 0;
+        if(parent.getModifiers() != null){
+            for (ProductModifier modifier : parent.getModifiers().getProductModifier()) {
+                if (modifier.getAlias() != null) {
+                    isArchive = modifier.getAlias().equals(DpcRoot.IS_ARCHIVE) ? 1 : 0;
+                }
             }
         }
         productDim.setIsArchive(isArchive);

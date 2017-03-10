@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "id"}, callSuper = false)
 @Getter
 @Setter
-public class MarketingProductDim extends AbstractDimEntity {
+public class MarketingProductDim extends AbstractDimEntity implements Identifiable{
 
     private String id;
 
@@ -37,4 +37,8 @@ public class MarketingProductDim extends AbstractDimEntity {
 
     private String expirationDate;
 
+    @Override
+    public String getFirstId() {
+        return getId();
+    }
 }

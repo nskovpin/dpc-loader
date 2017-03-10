@@ -1,5 +1,6 @@
 package ru.at_consulting.bigdata.dpc.json.region;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,12 +10,13 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Region {
 
-    @JsonProperty
+    @JsonProperty(value = "Id")
     private String id;
 
-    @JsonProperty
+    @JsonProperty(value = "Title")
     private String title;
 
     @JsonProperty(value = "ExternalRegionMappings")

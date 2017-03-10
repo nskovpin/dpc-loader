@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate"}, callSuper = false)
-public class ProductRegionLinkDim extends AbstractDimEntity {
+public class ProductRegionLinkDim extends AbstractDimEntity implements Identifiable {
 
     private String productId;
 
@@ -21,4 +21,13 @@ public class ProductRegionLinkDim extends AbstractDimEntity {
 
     private String expirationDate;
 
+    @Override
+    public String getSecondId() {
+        return super.getSecondId();
+    }
+
+    @Override
+    public String getFirstId() {
+        return null;
+    }
 }

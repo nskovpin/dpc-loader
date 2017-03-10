@@ -12,9 +12,6 @@ import lombok.Setter;
 @Setter
 public class ProductInfo {
 
-    @JsonProperty
-    private String name;
-
     @JsonProperty(value = "Products")
     private Products products;
 }

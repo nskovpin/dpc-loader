@@ -2,6 +2,7 @@ package ru.at_consulting.bigdata.dpc.parser;
 
 import org.junit.Assert;
 import org.junit.Test;
+import ru.at_consulting.bigdata.dpc.dim.Dim;
 import ru.at_consulting.bigdata.dpc.dim.MarketingProductDim;
 import ru.at_consulting.bigdata.dpc.dim.ProductDim;
 
@@ -9,6 +10,14 @@ import ru.at_consulting.bigdata.dpc.dim.ProductDim;
  * Created by NSkovpin on 27.02.2017.
  */
 public class ReflectionTest {
+
+    @Test
+    public void test(){
+        Class<?> clazz = ProductDim.class;
+        Dim dimMeta = clazz.getAnnotation(Dim.class);
+        dimMeta.name();
+        System.out.println(dimMeta.name());
+    }
 
     @Test
     public void stringifyTest() {

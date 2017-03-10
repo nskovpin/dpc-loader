@@ -1,5 +1,6 @@
 package ru.at_consulting.bigdata.dpc.json.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,12 +14,13 @@ import ru.at_consulting.bigdata.dpc.json.webentity.ProductWebEntities;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Product {
 
-    @JsonProperty
+    @JsonProperty(value = "Id")
     private String id;
 
-    @JsonProperty
+    @JsonProperty(value = "Type")
     private String type;
 
     @JsonProperty(value = "MarketingProduct")

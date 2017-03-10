@@ -1,5 +1,6 @@
 package ru.at_consulting.bigdata.dpc.json.webentity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,27 +10,28 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WebEntity {
 
-    @JsonProperty
+    @JsonProperty(value = "Id")
     private String id;
 
-    @JsonProperty
+    @JsonProperty(value = "Title")
     private String title;
 
-    @JsonProperty
+    @JsonProperty(value = "EntityId")
     private String entityId;
 
-    @JsonProperty
+    @JsonProperty(value = "SOC")
     private String soc;
 
-    @JsonProperty
+    @JsonProperty(value = "EntityType")
     private String entityType;
 
-    @JsonProperty
+    @JsonProperty(value = "BusinessType")
     private String businessType;
 
-    @JsonProperty
+    @JsonProperty(value = "PaySystemType")
     private String paySystemType;
 }
 

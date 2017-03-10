@@ -1,4 +1,4 @@
-package ru.at_consulting.bigdata.dpc.loader;
+package ru.at_consulting.bigdata.dpc.cluster.loader;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by NSkovpin on 02.03.2017.
@@ -124,7 +123,7 @@ public class ParserJson {
                                 region.getExternalRegionMappings());
 
                         for (ExternalRegionMappingDim sub : subExternalMapping) {
-                            sub.setId(region.getId());
+                            sub.setRegionId(region.getId());
                         }
 
                         externalRegionMappingDimList.addAll(subExternalMapping);
@@ -192,13 +191,13 @@ public class ParserJson {
         return HdfsWriter.createWriter(outputProductDirectory, configuration, append);
     }
 
-    private String getDimName(DimEntity dimEntity) {
+    public static String getDimName(DimEntity dimEntity) {
         Dim dimMeta = dimEntity.getClass().getAnnotation(Dim.class);
         return dimMeta.name();
     }
 
-    private String getDimName(Class<?> dimEntity) {
-        Dim dimMeta = dimEntity.getClass().getAnnotation(Dim.class);
+    public static String getDimName(Class<?> dimEntity) {
+        Dim dimMeta = dimEntity.getAnnotation(Dim.class);
         return dimMeta.name();
     }
 

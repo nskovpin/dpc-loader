@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "id"}, callSuper = false)
-public class RegionDim extends AbstractDimEntity {
+public class RegionDim extends AbstractDimEntity implements Identifiable {
 
     private String id;
 
@@ -20,4 +20,9 @@ public class RegionDim extends AbstractDimEntity {
     private String effectiveDate;
 
     private String expirationDate;
+
+    @Override
+    public String getFirstId() {
+        return getId();
+    }
 }

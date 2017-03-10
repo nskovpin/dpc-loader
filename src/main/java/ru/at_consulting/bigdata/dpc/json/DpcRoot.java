@@ -37,7 +37,7 @@ public class DpcRoot {
     @JsonProperty
     private String userName;
 
-    @JsonProperty(value = "ProductInfo")
+    @JsonProperty(value = "productInfo")
     private ProductInfo productInfo;
 
 }

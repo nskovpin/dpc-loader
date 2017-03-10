@@ -11,13 +11,13 @@ import lombok.Setter;
 @Setter
 public class ExternalRegionMapping {
 
-    @JsonProperty
+    @JsonProperty(value = "Id")
     private String id;
 
-    @JsonProperty
+    @JsonProperty(value = "SystemName")
     private String systemName;
 
-    @JsonProperty
+    @JsonProperty(value = "Value")
     private String value;
 
 }

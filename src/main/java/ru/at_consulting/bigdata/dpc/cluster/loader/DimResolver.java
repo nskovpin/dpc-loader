@@ -1,4 +1,4 @@
-package ru.at_consulting.bigdata.dpc.loader;
+package ru.at_consulting.bigdata.dpc.cluster.loader;
 
 import ru.at_consulting.bigdata.dpc.json.DpcRoot;
 

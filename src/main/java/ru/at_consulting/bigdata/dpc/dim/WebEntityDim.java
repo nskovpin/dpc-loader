@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "entityId", "productId"}, callSuper = false)
-public class WebEntityDim extends AbstractDimEntity {
+public class WebEntityDim extends AbstractDimEntity implements Identifiable{
 
     private String entityId;
 
@@ -31,4 +31,8 @@ public class WebEntityDim extends AbstractDimEntity {
 
     private String expirationDate;
 
+    @Override
+    public String getFirstId() {
+        return null;
+    }
 }

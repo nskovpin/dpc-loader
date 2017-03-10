@@ -1,5 +1,6 @@
 package ru.at_consulting.bigdata.dpc.json.marketing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,18 +10,19 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MarketingProduct {
 
-    @JsonProperty
+    @JsonProperty(value = "Id")
     private String id;
 
-    @JsonProperty
+    @JsonProperty(value = "Title")
     private String title;
 
-    @JsonProperty
+    @JsonProperty(value = "ProductType")
     private String productType;
 
-    @JsonProperty
+    @JsonProperty(value = "PaymentSystem")
     private String paymentSystem;
 
     @JsonProperty(value = "Categories")

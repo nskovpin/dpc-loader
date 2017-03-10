@@ -1,4 +1,4 @@
-package ru.at_consulting.bigdata.dpc.loader;
+package ru.at_consulting.bigdata.dpc.cluster.loader;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;

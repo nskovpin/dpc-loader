@@ -14,6 +14,11 @@ public abstract class AbstractDimEntity implements DimEntity {
     public static final Logger LOGGER = Logger.getLogger(AbstractDimEntity.class);
 
     @Override
+    public String getSecondId() {
+        return null;
+    }
+
+    @Override
     public List<Field> getFields() {
         return FieldUtils.getAllFieldsList(this.getClass());
     }

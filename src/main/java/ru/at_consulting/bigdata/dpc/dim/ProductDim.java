@@ -9,7 +9,7 @@ import lombok.*;
 @EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "id"}, callSuper = false)
 @Getter
 @Setter
-public class ProductDim extends AbstractDimEntity {
+public class ProductDim extends AbstractDimEntity implements Identifiable{
 
     private String id;
 
@@ -25,4 +25,8 @@ public class ProductDim extends AbstractDimEntity {
 
     private String expirationDate;
 
+    @Override
+    public String getFirstId() {
+        return getId();
+    }
 }

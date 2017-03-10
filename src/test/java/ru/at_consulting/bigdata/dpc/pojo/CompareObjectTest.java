@@ -4,7 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import ru.at_consulting.bigdata.dpc.dim.ProductDim;
-import ru.at_consulting.bigdata.dpc.dim.resolver.ProductDimResolver;
+import ru.at_consulting.bigdata.dpc.dim.resolver.ProductDimComparator;
 
 /**
  * Created by NSkovpin on 01.03.2017.
@@ -23,7 +23,7 @@ public class CompareObjectTest {
         productExistingDim.setMarketingProductId("id");
         productExistingDim.setId("2");
 
-        ProductDimResolver productDimResolver = new ProductDimResolver();
+        ProductDimComparator productDimResolver = new ProductDimComparator();
         Pair<ProductDim, ProductDim> products = productDimResolver.resolve(productNewDim, productExistingDim);
 
         ProductDim productExistingDim2 = new ProductDim();
