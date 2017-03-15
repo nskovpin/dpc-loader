@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.io.File;
 
@@ -16,17 +18,20 @@ import java.io.File;
 public class ClusterProperties {
     public static final String WORK = "work";
     public static final String DATA = "data";
+    public static final String TIME_KEY_PATTERN = "YYYYMMdd";
 
     public String projectName;
     public String hdfsJsonPath;
     public String hdfsOutputDir;
     public String hdfsWorkDir;
     public String hdfsDataDir;
+    public DateTime timeKey;
 
     public enum PARAM_NAMES {
         PROJECT_NAME,
         HDFS_JSON_PATH,
         HDFS_OUTPUT_DIR,
+        TIME_KEY
     }
 
     public ClusterProperties(Configuration configuration){
@@ -35,6 +40,8 @@ public class ClusterProperties {
         this.hdfsOutputDir = configuration.get(PARAM_NAMES.HDFS_OUTPUT_DIR.name());
         this.hdfsWorkDir = hdfsOutputDir + File.separator + WORK;
         this.hdfsDataDir = hdfsOutputDir + File.separator + DATA;
+        this.timeKey = DateTime.parse(configuration.get(PARAM_NAMES.TIME_KEY.name()),
+                DateTimeFormat.forPattern(TIME_KEY_PATTERN));
     }
 
     public ClusterProperties(String[] args){
@@ -44,14 +51,21 @@ public class ClusterProperties {
             switch (parameter){
                 case PROJECT_NAME:{
                     this.projectName =  keyValue[1];
+                    break;
                 }
                 case HDFS_JSON_PATH:{
                     this.hdfsJsonPath = keyValue[1];
+                    break;
                 }
                 case HDFS_OUTPUT_DIR:{
                     this.hdfsOutputDir = keyValue[1];
                     this.hdfsWorkDir = hdfsOutputDir + File.separator + WORK;
                     this.hdfsDataDir = hdfsOutputDir + File.separator + DATA;
+                    break;
+                }
+                case TIME_KEY: {
+                    this.timeKey = DateTime.parse(keyValue[1], DateTimeFormat.forPattern(TIME_KEY_PATTERN));
+                    break;
                 }
             }
         }

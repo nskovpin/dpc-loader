@@ -6,6 +6,7 @@ allprojects {
     apply plugin: 'idea'
     apply plugin: 'scala'
     apply plugin: 'java'
+    apply plugin: "jacoco"
 
     sourceCompatibility = 1.7
 
@@ -15,8 +16,10 @@ allprojects {
                 "jackson-databind",
                 "jackson-annotations",
                 "jackson-core",
-                "atc-tools",
-                "MockFtpServer"
+                "jackson-module-scala_2.10",
+                "jackson-module-paranamer",
+                "paranamer",
+                "atc-tools"
         ]
 
         urls = [
@@ -153,7 +156,7 @@ task fatJarShadowed(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',
                 'Implementation-Version': version,
-                'Main-Class': 'com.mkyong.DateUtils'
+                'Main-Class': 'ru.at_consulting.bigdata.dpc.cluster.GroupDims'
     }
     baseName = project.name + '-shadowed'
     def collection = shadow.collect()

@@ -33,8 +33,10 @@ public class MarketingProductDim extends AbstractDimEntity implements Identifiab
 
     private String equipmentType;
 
+    @DateToString
     private String effectiveDate;
 
+    @DateToString
     private String expirationDate;
 
     @Override

@@ -21,8 +21,10 @@ public class ExternalRegionMappingDim extends AbstractDimEntity implements Ident
 
     private String value;
 
+    @DateToString
     private String effectiveDate;
 
+    @DateToString
     private String expirationDate;
 
     @Override

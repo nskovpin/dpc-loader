@@ -2,6 +2,7 @@ package ru.at_consulting.bigdata.dpc.cluster.groups
 
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
+import ru.at_consulting.bigdata.dpc.cluster.groups.DoubleGroup.foundLastDim
 import ru.at_consulting.bigdata.dpc.dim.DimEntity
 import ru.at_consulting.bigdata.dpc.dim.resolver.DimComparatorFactory
 
@@ -12,13 +13,59 @@ import scala.collection.immutable.TreeMap
   */
 object DoubleGroupEasier extends GroupTrait {
 
-  override def groupDim(newRdd: RDD[String], historyRdd: RDD[String],
-                        dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[String] = {
-    val parsedNewRDD = newRdd.map(row => {
-      val dim = dimClass.newInstance()
-      dim.fillObject(row)
-      dim
-    }).map(dim => {
+  def groupNewWithHistoryRdd(newRdd: RDD[(String, DimEntity)], historyRdd: RDD[(String, DimEntity)],
+                             dimClass: Class[_<:DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[DimEntity] = {
+    val firstGrouping = newRdd.union(historyRdd).groupByKey()
+
+    val rdd = firstGrouping.map(keyAndIterable => {
+      val key = keyAndIterable._1
+      val lastDim = foundLastDim(keyAndIterable._2.filter(dim => dim.getExpirationDate == null))
+      val lastDate = if (lastDim == null) {
+        null
+      } else {
+        lastDim.getEffectiveDate
+      }
+      val allList = keyAndIterable._2.map(dim => (dim, lastDate))
+      (key, allList)
+    }).flatMapValues(x => x).map(keyAndTuple => {
+      ((keyAndTuple._1, keyAndTuple._2._1.getSecondId), keyAndTuple._2)
+    }).groupByKey().map(tupleKeyAndIterable => {
+      val key = tupleKeyAndIterable._1
+      val iterable = tupleKeyAndIterable._2
+      val dimTuple = findNewAndHistoryDims(iterable)
+      var answerList = List[DimEntity]()
+
+      if (dimTuple._1._1 != null) {
+        // found newDim
+        val newDim = dimTuple._1._1
+        val historyDim = dimTuple._2._1
+
+        val resolver = broadcast.value.getComparator(dimClass)
+        val pair = resolver.resolve(newDim, dimTuple._2._1)
+
+        if (pair.getLeft != null && pair.getRight == null) {
+          // newDim has changes
+          answerList = pair.getLeft :: answerList
+        }
+        if (pair.getRight != null) {
+          answerList = pair.getRight :: answerList
+        }
+      } else {
+        //not found newDim
+        val historyDim = dimTuple._2._1
+        if (dimTuple._2._2 != null) {
+          historyDim.setExpirationDate(dimTuple._2._2)
+        }
+        answerList = historyDim :: answerList
+      }
+
+      (key, answerList)
+    }).flatMapValues(x => x).map( x => x._2)
+    rdd
+  }
+
+  override def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity], dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, String)] = {
+    val parsedNewRDD = newRdd.map(dim => {
       ((dim.getFirstId, dim.getSecondId), dim)
     }).groupByKey().map(keyAndIterable => {
       val key = keyAndIterable._1
@@ -30,65 +77,14 @@ object DoubleGroupEasier extends GroupTrait {
       (firstKey, tupleAndDim._2)
     })
 
-    val parsedHistoryRDD = historyRdd.map(row => {
-      val dim = dimClass.newInstance()
-      dim.fillObject(row)
-      dim
-    }).filter(dim => dim.getExpirationDate != null)
+    val parsedHistoryRDD = historyRdd.filter(dim => dim.getExpirationDate != null)
       .filter(dim => dim.getExpirationDate.equals(DimEntity.EXPIRATION_DATE_INFINITY))
       .map(dim => {
         (dim.getFirstId, dim)
       })
 
-
-    val firstGrouping = parsedNewRDD.union(parsedHistoryRDD).groupByKey()
-
-    val rdd = firstGrouping.map(keyAndIterable => {
-
-      val key = keyAndIterable._1
-
-      val lastDim = foundLastDim(keyAndIterable._2.filter(dim => dim.getExpirationDate == null))
-
-      var historyMap = generateHistoryMap(keyAndIterable._2.filter(dim => dim.getExpirationDate != null))
-
-      val answerList = iterateNewDims(historyMap, keyAndIterable._2.filter(dim => dim.getExpirationDate == null),
-        dimClass, lastDim, broadcast)
-      (key, answerList)
-    }).flatMapValues(x => x).map(tuple => tuple._2)
-
-    rdd
-  }
-
-  def iterateNewDims(historyMap: Map[String, (DimEntity, Boolean)], iterableDims: Iterable[DimEntity],
-                     dimClass: Class[_ <: DimEntity], lastDim: DimEntity, broadcast: Broadcast[DimComparatorFactory]): List[String] = {
-    var answerList = List[String]()
-    var historyMapVar = historyMap
-    for (newDim <- iterableDims) {
-      val secondId = newDim.getSecondId
-      if (historyMapVar.contains(secondId)) {
-        historyMapVar += (secondId -> null)
-      } else {
-        newDim.setExpirationDate(DimEntity.EXPIRATION_DATE_INFINITY)
-        answerList = newDim.stringify() :: answerList
-      }
-    }
-
-    historyMapVar.filter(keyAndTuple => keyAndTuple._2 != null && !keyAndTuple._2._2).foreach(keyAndTuple => {
-      val historyDim = keyAndTuple._2._1
-      historyDim.setExpirationDate(lastDim.getEffectiveDate)
-      answerList = historyDim.stringify() :: answerList
-    })
-    answerList
-  }
-
-  def generateHistoryMap(iterableDims: Iterable[DimEntity]): Map[String, (DimEntity, Boolean)] = {
-    var historyRegionDimMap = Map[String, (DimEntity, Boolean)]()
-    val dimIterator = iterableDims.iterator
-    while (dimIterator.hasNext) {
-      val dim = dimIterator.next()
-      historyRegionDimMap += (dim.getSecondId -> (dim, false))
-    }
-    historyRegionDimMap
+    groupNewWithHistoryRdd(parsedNewRDD, parsedHistoryRDD, dimClass, broadcast)
+      .map(x => (x.stringifyExpirationDate(),x.stringify()))
   }
 
 }

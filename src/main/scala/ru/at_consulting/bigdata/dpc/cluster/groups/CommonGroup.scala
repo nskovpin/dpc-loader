@@ -12,31 +12,9 @@ import ru.at_consulting.bigdata.dpc.dim.resolver.DimComparatorFactory
   */
 object CommonGroup extends GroupTrait {
 
-  override def groupDim(newRdd: RDD[String], historyRdd: RDD[String], dimClass: Class[_ <: DimEntity],
-                        broadcast: Broadcast[DimComparatorFactory]): RDD[String] = {
-    val parsedNewRDD = newRdd.map(row => {
-      val dim = dimClass.newInstance()
-      dim.fillObject(row)
-      dim
-    }).map(dim => {
-      (dim.getFirstId, dim)
-    }).groupByKey().map( keyAndIterable =>{
-        val key = keyAndIterable._1
-        val lastDim = foundLastDim(keyAndIterable._2)
-      (key, lastDim)
-    })
-
-    val parsedHistoryRDD = historyRdd.map(row => {
-      val dim = dimClass.newInstance()
-      dim.fillObject(row)
-      dim
-    }).filter(dim => dim.getExpirationDate != null)
-      .filter(dim => dim.getExpirationDate.equals(DimEntity.EXPIRATION_DATE_INFINITY))
-      .map(dim => {
-        (dim.getFirstId, dim)
-      })
-
-    val lines = parsedNewRDD.fullOuterJoin(parsedHistoryRDD).map(join => {
+  def joinNewWithHistory(newRdd: RDD[(String, DimEntity)], historyRdd: RDD[(String, DimEntity)],
+                         dimClass: Class[_<:DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, List[DimEntity])] ={
+    newRdd.fullOuterJoin(historyRdd).map(join => {
       val key = join._1
 
       val newOption = join._2._1 match {
@@ -52,7 +30,7 @@ object CommonGroup extends GroupTrait {
       if (newOption == null) {
 
         val historyDim = historyOption.asInstanceOf[DimEntity]
-        (key, List(historyDim.stringify()))
+        (key, List(historyDim))
 
       } else {
         val newDim = newOption.asInstanceOf[DimEntity]
@@ -60,20 +38,34 @@ object CommonGroup extends GroupTrait {
         val resolver = broadcast.value.getComparator(dimClass)
         val pair = resolver.resolve(newDim, historyOption.asInstanceOf[DimEntity])
 
-        var list = List[String]()
+        var list = List[DimEntity]()
         if (pair.getLeft != null) {
-          list = pair.getLeft.stringify() :: list
+          list = pair.getLeft :: list
         }
         if (pair.getRight != null) {
-          list = pair.getRight.stringify() :: list
+          list = pair.getRight :: list
         }
         (key, list)
 
       }
-    }): RDD[(String, List[String])]
-    lines.flatMapValues(x => x).map(keyValue => keyValue._2)
+    }): RDD[(String, List[DimEntity])]
   }
 
+  override def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity], dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, String)] ={
+    val parsedNewRDD = newRdd.map(dim => {
+      (dim.getFirstId, dim)
+    }).groupByKey().map( keyAndIterable =>{
+      val key = keyAndIterable._1
+      val lastDim = foundLastDim(keyAndIterable._2)
+      (key, lastDim)
+    })
 
+    val parsedHistoryRDD = historyRdd.filter(dim => dim.getExpirationDate != null)
+      .filter(dim => dim.getExpirationDate.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(dim => {
+      (dim.getFirstId, dim)
+    })
 
+    val lines = joinNewWithHistory(parsedNewRDD, parsedHistoryRDD, dimClass, broadcast)
+    lines.flatMapValues(x => x).map(keyValue => (keyValue._2.stringifyExpirationDate(), keyValue._2.stringify()))
+  }
 }

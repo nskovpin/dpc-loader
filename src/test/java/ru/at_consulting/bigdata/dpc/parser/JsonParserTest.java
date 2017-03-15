@@ -9,13 +9,17 @@ import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import ru.at_consulting.bigdata.dpc.dim.RegionDim;
+import ru.at_consulting.bigdata.dpc.dim.*;
 import ru.at_consulting.bigdata.dpc.json.DpcRoot;
 import ru.at_consulting.bigdata.dpc.cluster.loader.ParserJson;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by NSkovpin on 26.02.2017.
@@ -26,8 +30,23 @@ public class JsonParserTest {
 
     @Before
     public void setup() throws URISyntaxException {
-        final String jsonName = "json/dimHolder";
+        final String jsonName = "json/trueJson";
         this.jsonPath = Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI());
+    }
+
+
+    @Test
+    public void stringifyDate(){
+        ProductDim productDim = new ProductDim();
+
+        productDim.setExpirationDate("2999.12.31");
+        String date1 = productDim.stringifyExpirationDate();
+        Assert.assertTrue(date1.equals("2999.12.31"));
+
+        productDim.setExpirationDate("2017-02-02T13:41:24.0767007+03:00");
+        String date2 = productDim.stringifyExpirationDate();
+        Assert.assertTrue(date2.equals("2017.02.02"));
+
     }
 
     @Test
@@ -37,18 +56,19 @@ public class JsonParserTest {
         DateTime dateTime1 = DateTime.parse("2017-02-27T20:46:56.086815+03:00");
 
         Assert.assertTrue(dateTime1.isBefore(dateTime));
+
     }
 
     @Test
     public void jsonDomParser() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);;
         DpcRoot dpcRoot = mapper.readValue(Files.newInputStream(jsonPath), DpcRoot.class);
         Assert.assertNotNull(dpcRoot);
     }
 
     @Test
     public void jsonStreamParser() throws IOException, URISyntaxException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);;
         Path arrayPath = Paths.get(JsonParserTest.class.getResource("/json/arrayParse").toURI());
         JsonParser parser = mapper.getFactory().createParser(Files.newInputStream(arrayPath));
         if(parser.nextToken() != JsonToken.START_ARRAY) {
@@ -64,44 +84,62 @@ public class JsonParserTest {
     }
 
     @Test
-    public void jsonParse() throws IOException, URISyntaxException {
-        String jsonName = "json/dimHolder";
-        ObjectMapper mapper = new ObjectMapper();
-        DpcRoot dpcRoot = mapper.readValue(Files.newInputStream(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI())), DpcRoot.class);
-
-        ParserJson parserJson = new ParserJson();
-        ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
-
-        Assert.assertTrue(parsedDimsHolder != null);
-        Assert.assertTrue(parsedDimsHolder.getMarketingProductDim() != null);
-
-        Path market = Paths.get(JsonParserTest.class.getResource("/parsed/" + "market").toURI());
-        String str = parsedDimsHolder.getMarketingProductDim().stringify();
-        Assert.assertTrue(str != null);
-        Files.write(market, str.getBytes());
-
-        Path product = Paths.get(JsonParserTest.class.getResource("/parsed/" + "product").toURI());
-        String strProduct = parsedDimsHolder.getProductDim().stringify();
-        Files.write(product, strProduct.getBytes());
-
-        Path region = Paths.get(JsonParserTest.class.getResource("/parsed/" + "region").toURI());
-        String allRegions = "";
-        for(RegionDim s : parsedDimsHolder.getRegionDimList() ){
-            allRegions += s.stringify() + "\n";
-        }
-        Files.write(region, allRegions.getBytes());
-    }
-
-    @Test
     public void realJsonParse() throws URISyntaxException, IOException {
         String jsonName = "json/trueJson";
-        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);;
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         DpcRoot dpcRoot = mapper.readValue(Files.newInputStream(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI())), DpcRoot.class);
 
         ParserJson parserJson = new ParserJson();
         ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
         Assert.assertTrue(parsedDimsHolder != null);
         Assert.assertTrue(parsedDimsHolder.getRegionDimList().size() > 10);
+
+        String out = "src/test/resources/parsed";
+        Files.write(Paths.get(out + File.separator + "product"),parsedDimsHolder.getProductDim().stringify().getBytes());
+
+        String allRegions = "";
+        for(RegionDim s : parsedDimsHolder.getRegionDimList() ){
+            allRegions += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "region"), allRegions.getBytes());
+
+        String allExternal = "";
+        for(ExternalRegionMappingDim s : parsedDimsHolder.getExternalRegionMappingDimList()){
+            allExternal += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "external"), allExternal.getBytes());
+
+        Files.write(Paths.get(out + File.separator + "market"), parsedDimsHolder.getMarketingProductDim().stringify().getBytes());
+
+        String allLinks = "";
+        for(ProductRegionLinkDim s : parsedDimsHolder.getProductRegionLinkDimList()){
+            allLinks += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "links"), allLinks.getBytes());
+
+        String allWebs = "";
+        for(WebEntityDim s : parsedDimsHolder.getWebEntityDimList()){
+            allWebs += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "web"), allWebs.getBytes());
+
+    }
+
+    @Test
+    public void readAllJsonParse() throws URISyntaxException, IOException {
+        String jsonName = "json/dataTest.csv";
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        List<String> lines = Files.readAllLines(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI()), Charset.forName("UTF-8"));
+
+        List<ParserJson.ParsedDimsHolder> list = new ArrayList<>();
+        for(String line: lines){
+            DpcRoot dpcRoot = mapper.readValue(line, DpcRoot.class);
+            ParserJson parserJson = new ParserJson();
+            ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
+            list.add(parsedDimsHolder);
+            Assert.assertTrue(parsedDimsHolder != null);
+        }
+        Assert.assertTrue(list.size() > 500);
     }
 
 }

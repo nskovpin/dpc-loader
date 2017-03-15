@@ -1,6 +1,6 @@
 package ru.at_consulting.bigdata.dpc.cluster.loaders
 
-import org.apache.hadoop.io.Text
+import org.apache.hadoop.io.{LongWritable, Text, WritableComparable}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
@@ -10,7 +10,7 @@ import org.apache.spark.rdd.RDD
 object LoadSequenceFile extends Loader{
 
   def loadRdd(sc: SparkContext, path: String) : RDD[String] = {
-    sc.sequenceFile(path, classOf[Text], classOf[Text]).
+    sc.sequenceFile(path, classOf[LongWritable], classOf[Text]).
       map(x => x._2.toString)
   }
 
@@ -24,7 +24,7 @@ object LoadSequenceFile extends Loader{
   }
 
   override def loadDataSource(sc: SparkContext, path: String): RDD[String] = {
-    loadRdd(sc, path);
+    loadRdd(sc, path)
   }
 
 }

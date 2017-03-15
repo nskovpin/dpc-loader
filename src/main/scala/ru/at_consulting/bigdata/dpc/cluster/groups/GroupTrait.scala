@@ -35,14 +35,25 @@ trait GroupTrait {
     newRdd.count() > 0
   }
 
-  def group(newRdd: RDD[String], historyRdd: RDD[String], sc: SparkContext, dimClass: Class[_ <: DimEntity]):RDD[String] ={
-    val broadcastFactory = sc.broadcast(new DimComparatorFactory)
-    groupDim(newRdd, historyRdd, dimClass, broadcastFactory)
+  def findNewAndHistoryDims(iterable: Iterable[(DimEntity, String)]): ((DimEntity, String), (DimEntity, String)) = {
+    var newDim: (DimEntity, String) = (null, null)
+    var historyDim: (DimEntity, String) = (null, null)
+    for (dimTuple <- iterable) {
+      if (dimTuple._1.getExpirationDate == null) {
+        newDim = dimTuple
+      } else {
+        historyDim = dimTuple
+      }
+    }
+    (newDim, historyDim)
   }
 
-  def groupDim(newRdd: RDD[String], historyRdd: RDD[String],
-               dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]):RDD[String]
+  def groupRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity], sc: SparkContext, dimClass: Class[_<:DimEntity]):RDD[(String, String)]={
+    val broadcastFactory = sc.broadcast(new DimComparatorFactory)
+    groupDimRdds(newRdd, historyRdd, dimClass, broadcastFactory)
+  }
 
-
+  def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity],
+               dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]):RDD[(String, String)]
 
 }

@@ -21,8 +21,10 @@ public class ProductDim extends AbstractDimEntity implements Identifiable{
 
     private Integer isDel;
 
+    @DateToString
     private String effectiveDate;
 
+    @DateToString
     private String expirationDate;
 
     @Override

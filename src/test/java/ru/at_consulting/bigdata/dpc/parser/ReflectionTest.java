@@ -24,7 +24,7 @@ public class ReflectionTest {
         ProductDim productDim = new ProductDim();
         productDim.setId("id123");
         productDim.setIsArchive(1);
-        productDim.setEffectiveDate("date");
+        productDim.setEffectiveDate("2999.12.12");
         String str = productDim.stringify();
 
         Assert.assertNotNull(str != null);

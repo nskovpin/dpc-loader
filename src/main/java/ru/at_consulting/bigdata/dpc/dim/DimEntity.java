@@ -17,6 +17,8 @@ public interface DimEntity extends Serializable, Identifiable{
 
     String stringify();
 
+    String stringifyExpirationDate();
+
     void setEffectiveDate(String date);
 
     void setExpirationDate(String date);

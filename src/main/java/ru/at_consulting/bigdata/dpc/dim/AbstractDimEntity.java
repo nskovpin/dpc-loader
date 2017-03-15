@@ -2,6 +2,8 @@ package ru.at_consulting.bigdata.dpc.dim;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +25,7 @@ public abstract class AbstractDimEntity implements DimEntity {
         return FieldUtils.getAllFieldsList(this.getClass());
     }
 
-    public void fillObject(String input){
+    public void fillObject(String input) {
         try {
             List<Field> fieldList = getFields();
 
@@ -33,18 +35,18 @@ public abstract class AbstractDimEntity implements DimEntity {
                 String nullable = dimMeta.nullable();
 
                 String[] fieldValuesArray = input.split(delimiter, -1);
-                for (int i = 0; i < fieldList.size(); i ++) {
-                    if(fieldList.get(i).getType() == LOGGER.getClass()){
+                for (int i = 0; i < fieldList.size(); i++) {
+                    if (fieldList.get(i).getType() == LOGGER.getClass()) {
                         continue;
                     }
-                    String value =  fieldValuesArray[i];
+                    String value = fieldValuesArray[i];
 
                     Object object;
-                    if(value.equals(nullable)){
+                    if (value.equals(nullable)) {
                         object = null;
-                    }else if(fieldList.get(i).getType() == List.class){
-                        object = new ArrayList<>(Arrays.asList(value.split(",",-1)));
-                    }else{
+                    } else if (fieldList.get(i).getType() == List.class) {
+                        object = new ArrayList<>(Arrays.asList(value.split(",", -1)));
+                    } else {
                         object = fieldList.get(i).getType().getConstructor(String.class).newInstance(value);
                     }
 
@@ -65,14 +67,14 @@ public abstract class AbstractDimEntity implements DimEntity {
             String nullable = dimMeta.nullable();
 
             List<Field> fieldList = getFields();
-            for(Field field: fieldList){
-                if(field.getType() == LOGGER.getClass()){
+            for (Field field : fieldList) {
+                if (field.getType() == LOGGER.getClass()) {
                     continue;
                 }
                 field.setAccessible(true);
                 try {
                     Object value = field.get(this);
-                    appendToBuilder(stringBuilder, delimiter, nullable, value);
+                    appendToBuilder(stringBuilder, delimiter, nullable, field, value);
                 } catch (IllegalAccessException e) {
                     LOGGER.error("Can't get field value:" + this.toString());
                     e.printStackTrace();
@@ -83,29 +85,70 @@ public abstract class AbstractDimEntity implements DimEntity {
         return stringBuilder.toString();
     }
 
-    private void appendToBuilder(StringBuilder stringBuilder, String delimiter, String nullable, Object value){
-        if(value == null){
+    @Override
+    public String stringifyExpirationDate() {
+        String expirationDate = this.getExpirationDate();
+        if (expirationDate == null) {
+            return null;
+        }
+        Field field = FieldUtils.getField(this.getClass(), "expirationDate", true);
+        if (field.getAnnotation(DateToString.class) != null) {
+            String pattern = field.getAnnotation(DateToString.class).pattern();
+            DateTime dateTime;
+            if (expirationDate.length() == 10) {
+                dateTime = DateTime.parse(expirationDate, DateTimeFormat.forPattern(pattern));
+            } else {
+                dateTime = DateTime.parse(expirationDate);
+            }
+            return dateTime.toString(pattern);
+        }
+        throw new RuntimeException("Class doesn't have a field");
+    }
+
+    private void appendToBuilder(StringBuilder stringBuilder, String delimiter, String nullable,
+                                 Field field, Object value) {
+        if (value == null) {
             value = nullable;
         }
 
-        if(value instanceof List){
+        if (value instanceof List) {
             List list = (List) value;
-            StringBuilder mergedValue =  new StringBuilder();
-            for (Object listValue: list) {
-                if(mergedValue.length() == 0){
+            StringBuilder mergedValue = new StringBuilder();
+            for (Object listValue : list) {
+                if (mergedValue.length() == 0) {
                     mergedValue.append(listValue);
-                }else {
+                } else {
                     mergedValue.append(",").append(listValue);
                 }
             }
             value = mergedValue.toString();
         }
 
-        if(stringBuilder.length() == 0){
+        value = stringifyDate(field, value, nullable);
+
+        if (stringBuilder.length() == 0) {
             stringBuilder.append(value);
-        }else{
+        } else {
             stringBuilder.append(delimiter).append(value);
         }
+    }
+
+    private Object stringifyDate(Field field, Object value, String nullable) {
+        if (value == null || value.equals(nullable)) {
+            return nullable;
+        }
+        if (field.getAnnotation(DateToString.class) != null) {
+            String pattern = field.getAnnotation(DateToString.class).pattern();
+            String date = String.valueOf(value);
+            DateTime dateTime;
+            if (date.length() == 10) {
+                dateTime = DateTime.parse(String.valueOf(value), DateTimeFormat.forPattern(pattern));
+            } else {
+                dateTime = DateTime.parse(String.valueOf(value));
+            }
+            return dateTime.toString(pattern);
+        }
+        return value;
     }
 
 }

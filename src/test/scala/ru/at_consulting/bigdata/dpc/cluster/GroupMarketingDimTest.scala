@@ -2,11 +2,13 @@ package ru.at_consulting.bigdata.dpc.cluster
 
 import java.nio.file.Paths
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.FileSystem
 import org.scalatest.Matchers
 import ru.at_consulting.bigdata.dpc.cluster.groups.GroupTraitFactory
 import ru.at_consulting.bigdata.dpc.cluster.loaders.LoadTextFile
 import ru.at_consulting.bigdata.dpc.cluster.utils.SparkTestUtils
-import ru.at_consulting.bigdata.dpc.dim.MarketingProductDim
+import ru.at_consulting.bigdata.dpc.dim.{DimEntity, MarketingProductDim, ProductDim}
 
 /**
   * Created by NSkovpin on 07.03.2017.
@@ -15,26 +17,35 @@ import ru.at_consulting.bigdata.dpc.dim.MarketingProductDim
   */
 class GroupMarketingDimTest extends SparkTestUtils with Matchers {
 
-  System.setProperty("hadoop.home.dir", "C:\\winutil\\")
-
-  val newMarketingDimPath: String = Paths.get("src/test/resources/scala/marketing/in/newMarketingDim").toString
-  val historyMarketingDimPath: String = Paths.get("src/test/resources/scala/marketing/in/historyMarketingDim").toString
-  val result = "src/test/resources/scala/marketing/out/result"
+  val newMarketingDimPath: String = Paths.get("src/test/resources/scala/in/new").toString
+  val historyMarketingDimPath: String = Paths.get("src/test/resources/scala/in/history").toString
+  val resultPath = "src/test/resources/scala/out/marketing/result"
 
 
   sparkTest("MarketingDimTest") {
     println("Test 1")
+    val conf = new Configuration()
+    val fs = FileSystem.get(conf)
 
-    val newMarketingDimRdd = LoadTextFile.loadDataSource(sc, newMarketingDimPath)
-    assert(newMarketingDimRdd.count() > 0)
-    val historyMarketingDimRdd = LoadTextFile.loadDataSource(sc, historyMarketingDimPath)
-    assert(historyMarketingDimRdd.count() > 0)
-    val groupTrait = GroupTraitFactory.createGroupTrait(classOf[MarketingProductDim])
-    val result1 = groupTrait.group(newMarketingDimRdd, historyMarketingDimRdd, sc, classOf[MarketingProductDim])
-    assert(result1.count() > 0)
-    val expected = sc.textFile(result + "1")
-    writeToFile("src/test/resources/scala/tesssst2", result1.collect().mkString("\n"))
-    result1.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected.collect().sortWith((a, b) => a.compare(b) >= 0))
+    val newRdd = ClusterExecutor.loadAggregate(sc, fs, LoadTextFile, newMarketingDimPath, classOf[MarketingProductDim])
+    assert(newRdd.count() > 0)
+
+    val historyRdd = ClusterExecutor.loadAggregate(sc, fs, LoadTextFile, historyMarketingDimPath, classOf[MarketingProductDim])
+    assert(historyRdd.count() > 0)
+
+    val result = ClusterExecutor.executeGroups(newRdd, historyRdd, sc, classOf[MarketingProductDim])
+    assert(result.count() > 0)
+
+    val result1 = result.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
+    val result2 = result.filter(x => !x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
+
+    val expected1 = sc.textFile(resultPath + "1")
+    val expected2 = sc.textFile(resultPath + "2")
+    writeToFile("src/test/resources/scala/market1", result1.collect().mkString("\n"))
+    writeToFile("src/test/resources/scala/market2", result2.collect().mkString("\n"))
+
+    result1.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected1.collect().sortWith((a, b) => a.compare(b) >= 0))
+    result2.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected2.collect().sortWith((a, b) => a.compare(b) >= 0))
   }
 
 }

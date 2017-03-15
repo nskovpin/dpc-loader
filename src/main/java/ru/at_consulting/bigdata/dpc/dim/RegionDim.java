@@ -17,8 +17,10 @@ public class RegionDim extends AbstractDimEntity implements Identifiable {
 
     private String title;
 
+    @DateToString
     private String effectiveDate;
 
+    @DateToString
     private String expirationDate;
 
     @Override

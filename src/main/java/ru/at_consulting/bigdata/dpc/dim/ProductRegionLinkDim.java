@@ -17,17 +17,19 @@ public class ProductRegionLinkDim extends AbstractDimEntity implements Identifia
 
     private String regionId;
 
+    @DateToString
     private String effectiveDate;
 
+    @DateToString
     private String expirationDate;
 
     @Override
     public String getSecondId() {
-        return super.getSecondId();
+        return getRegionId();
     }
 
     @Override
     public String getFirstId() {
-        return null;
+        return getProductId();
     }
 }
