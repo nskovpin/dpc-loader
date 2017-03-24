@@ -18,8 +18,8 @@
 		<sla:info>
 			<sla:nominal-time>${coord:nominalTime()}</sla:nominal-time>
 			<sla:should-start>${1 * DAYS}</sla:should-start>
-			<sla:should-end>${2 * DAYS}</sla:should-end>
-			<sla:max-duration>${3 * DAYS}</sla:max-duration>
+			<sla:should-end>${1 * DAYS}</sla:should-end>
+			<sla:max-duration>${1 * DAYS}</sla:max-duration>
 			<sla:alert-events>start_miss,end_miss,duration_miss</sla:alert-events>
 			<sla:alert-contact>${MAIL}</sla:alert-contact>
 		</sla:info>

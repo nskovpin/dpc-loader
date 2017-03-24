@@ -13,7 +13,7 @@ import scala.collection.immutable.TreeMap
 object DoubleGroup extends GroupTrait {
 
   def groupNewWithHistoryRdd(newRdd: RDD[(String, DimEntity)], historyRdd: RDD[(String, DimEntity)],
-                             dimClass: Class[_<:DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[DimEntity] = {
+                             dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[DimEntity] = {
     val firstGrouping = newRdd.union(historyRdd).groupByKey()
 
     val rdd = firstGrouping.map(keyAndIterable => {
@@ -58,7 +58,7 @@ object DoubleGroup extends GroupTrait {
         answerList = historyDim :: answerList
       }
       (key, answerList)
-    }).flatMapValues(x => x).map(x =>x._2)
+    }).flatMapValues(x => x).map(x => x._2)
     rdd
   }
 

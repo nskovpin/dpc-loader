@@ -55,5 +55,4 @@ trait GroupTrait {
 
   def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity],
                dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]):RDD[(String, String)]
-
 }

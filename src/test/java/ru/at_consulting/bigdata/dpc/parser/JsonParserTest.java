@@ -142,4 +142,21 @@ public class JsonParserTest {
         Assert.assertTrue(list.size() > 500);
     }
 
+    @Test
+    public void readAllJsonParse2() throws URISyntaxException, IOException {
+        String jsonName = "json/dpc.csv";
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        List<String> lines = Files.readAllLines(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI()), Charset.forName("UTF-8"));
+
+        List<ParserJson.ParsedDimsHolder> list = new ArrayList<>();
+        for(String line: lines){
+            DpcRoot dpcRoot = mapper.readValue(line, DpcRoot.class);
+            ParserJson parserJson = new ParserJson();
+            ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
+            list.add(parsedDimsHolder);
+            Assert.assertTrue(parsedDimsHolder != null);
+        }
+        Assert.assertTrue(list.size() == 11);
+    }
+
 }

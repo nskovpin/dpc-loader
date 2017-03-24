@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.joda.time.DateTime
 import ru.at_consulting.bigdata.dpc.cluster.groups.GroupTraitFactory
 import ru.at_consulting.bigdata.dpc.cluster.loader.ParserJson
 import ru.at_consulting.bigdata.dpc.cluster.loaders.Loader
+import ru.at_consulting.bigdata.dpc.cluster.system.ClusterProperties
 import ru.at_consulting.bigdata.dpc.dim._
 import ru.at_consulting.bigdata.dpc.json.DpcRoot
 
@@ -18,11 +20,15 @@ import ru.at_consulting.bigdata.dpc.json.DpcRoot
 object ClusterExecutor {
 
   def execute(sc: SparkContext, hdfs: FileSystem, loader: Loader, jsonPath: String, aggregatePath: String,
-              timeKey: String, test: Boolean = false, openDate: String = "29991231"): Unit = {
+              timeKeyDateTime: DateTime, test: Boolean = false, optional: Boolean = false, openDate: String = "29991231"): Unit = {
     var jsonPathNew = ""
-    if(!test){
-      jsonPathNew = jsonPath + File.separator + timeKey
-    }else{
+    val timeKey = timeKeyDateTime.toString(ClusterProperties.TIME_KEY_PATTERN)
+    if (!test) {
+      jsonPathNew = jsonPath + File.separator +
+        timeKeyDateTime.toString("YYYY") + File.separator +
+        timeKeyDateTime.toString("MM") + File.separator +
+        timeKeyDateTime.toString("dd")
+    } else {
       jsonPathNew = jsonPath
     }
 
@@ -51,6 +57,13 @@ object ClusterExecutor {
     var newRegionRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._5)).flatMapValues(x => convertToList(x)).map(x => x._2)
     var newWebEntityRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._6)).flatMapValues(x => convertToList(x)).map(x => x._2)
 
+    var product: RDD[(String, String)] = null
+    var external: RDD[(String, String)] = null
+    var market: RDD[(String, String)] = null
+    var link: RDD[(String, String)] = null
+    var region: RDD[(String, String)] = null
+    var web: RDD[(String, String)] = null
+
     var historyProductRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ProductDim], openDate)
     var historyExternalRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ExternalRegionMappingDim], openDate)
     var historyMarketingRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[MarketingProductDim], openDate)
@@ -58,13 +71,12 @@ object ClusterExecutor {
     var historyRegionRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[RegionDim], openDate)
     var historyWebEntityRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[WebEntityDim], openDate)
 
-    val product = executeGroups(newProductRdd, historyProductRdd, sc, classOf[ProductDim])
-    val external = executeGroups(newExternalRdd, historyExternalRdd, sc, classOf[ExternalRegionMappingDim])
-    val market = executeGroups(newMarketingRdd, historyMarketingRdd, sc, classOf[MarketingProductDim])
-    val link = executeGroups(newProductRegionLinkRdd, historyProductRegionLinkRdd, sc, classOf[ProductRegionLinkDim])
-    val region = executeGroups(newRegionRdd, historyRegionRdd, sc, classOf[RegionDim])
-    val web = executeGroups(newWebEntityRdd, historyWebEntityRdd, sc, classOf[WebEntityDim])
-
+    product = executeGroups(newProductRdd, historyProductRdd, sc, classOf[ProductDim])
+    external = executeGroups(newExternalRdd, historyExternalRdd, sc, classOf[ExternalRegionMappingDim])
+    market = executeGroups(newMarketingRdd, historyMarketingRdd, sc, classOf[MarketingProductDim])
+    link = executeGroups(newProductRegionLinkRdd, historyProductRegionLinkRdd, sc, classOf[ProductRegionLinkDim])
+    region = executeGroups(newRegionRdd, historyRegionRdd, sc, classOf[RegionDim])
+    web = executeGroups(newWebEntityRdd, historyWebEntityRdd, sc, classOf[WebEntityDim])
 
     if (!test) {
       saveAggregate(product, hdfs, aggregatePath, classOf[ProductDim], timeKey, openDate)
@@ -99,24 +111,36 @@ object ClusterExecutor {
 
   def saveAggregate(lines: RDD[(String, String)], hdfs: FileSystem, aggregatePath: String, dimClass: Class[_ <: DimEntity],
                     timeKey: String, openDate: String): Unit = {
+    val TEMP = "_temp"
     val pathClosed = aggregatePath + File.separator + ParserJson.getDimName(dimClass) + File.separator + timeKey
     val pathOpened = aggregatePath + File.separator + ParserJson.getDimName(dimClass) + File.separator + openDate
+    val pathOpenedTEMP = pathOpened + TEMP
     if (hdfs.exists(new Path(pathClosed))) {
       hdfs.delete(new Path(pathClosed), true)
     }
-    if (hdfs.exists(new Path(pathOpened))) {
-      hdfs.delete(new Path(pathOpened), true)
+    if (hdfs.exists(new Path(pathOpenedTEMP))) {
+      hdfs.delete(new Path(pathOpenedTEMP), true)
     }
 
     val closed = lines.filter(keyAndValue => !keyAndValue._1.equals(DimEntity.EXPIRATION_DATE_INFINITY))
       .map(x => (timeKey, x._2))
 
-    if(closed.count() > 0){
-        closed.saveAsSequenceFile(pathClosed)
+    if (closed.count() > 0) {
+      closed.saveAsSequenceFile(pathClosed)
     }
 
     lines.filter(keyAndValue => keyAndValue._1.equals(DimEntity.EXPIRATION_DATE_INFINITY))
-      .map(x => (openDate, x._2)).saveAsSequenceFile(pathOpened)
+      .map(x => (openDate, x._2)).saveAsSequenceFile(pathOpenedTEMP)
+
+    if (hdfs.exists(new Path(pathOpened))) {
+      hdfs.delete(new Path(pathOpened), true)
+    }
+
+    if (hdfs.exists(new Path(pathOpenedTEMP))) {
+      hdfs.rename(new Path(pathOpenedTEMP), new Path(pathOpened))
+    }
+
+
   }
 
   private def parseDimEntities(lines: RDD[String], dimClass: Class[_ <: DimEntity]): RDD[DimEntity] = {

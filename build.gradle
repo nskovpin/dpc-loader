@@ -13,13 +13,13 @@ allprojects {
     ext {
 
         shadow = [
-                "jackson-databind",
-                "jackson-annotations",
-                "jackson-core",
-                "jackson-module-scala_2.10",
-                "jackson-module-paranamer",
-                "paranamer",
-                "atc-tools"
+//                "jackson-databind",
+//                "jackson-annotations",
+//                "jackson-core",
+//                "jackson-module-scala_2.10",
+//                "jackson-module-paranamer",
+//                "paranamer",
+//                "atc-tools"
         ]
 
         urls = [
@@ -116,8 +116,8 @@ allprojects {
 
     dependencies {
         compile "org.projectlombok:lombok:1.16.14"
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.5'
-        compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-scala_2.10', version: '2.8.5'
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.4'
+        compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-scala_2.10', version: '2.4.4'
 
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
         compile ('ru.at_consulting.bigdata:atc-tools:0.4.16-SNAPSHOT') {
@@ -131,6 +131,15 @@ allprojects {
 
         testCompile deps.scala.test
         testCompile group: 'junit', name: 'junit', version: '4.11'
+    }
+}
+
+jacocoTestReport {
+    group = "Reporting"
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/reports/coverage"
     }
 }
 

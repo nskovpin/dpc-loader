@@ -13,7 +13,7 @@ import ru.at_consulting.bigdata.dpc.dim.resolver.DimComparatorFactory
 object CommonGroup extends GroupTrait {
 
   def joinNewWithHistory(newRdd: RDD[(String, DimEntity)], historyRdd: RDD[(String, DimEntity)],
-                         dimClass: Class[_<:DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, List[DimEntity])] ={
+                         dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, List[DimEntity])] = {
     newRdd.fullOuterJoin(historyRdd).map(join => {
       val key = join._1
 
@@ -51,10 +51,10 @@ object CommonGroup extends GroupTrait {
     }): RDD[(String, List[DimEntity])]
   }
 
-  override def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity], dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, String)] ={
+  override def groupDimRdds(newRdd: RDD[DimEntity], historyRdd: RDD[DimEntity], dimClass: Class[_ <: DimEntity], broadcast: Broadcast[DimComparatorFactory]): RDD[(String, String)] = {
     val parsedNewRDD = newRdd.map(dim => {
       (dim.getFirstId, dim)
-    }).groupByKey().map( keyAndIterable =>{
+    }).groupByKey().map(keyAndIterable => {
       val key = keyAndIterable._1
       val lastDim = foundLastDim(keyAndIterable._2)
       (key, lastDim)

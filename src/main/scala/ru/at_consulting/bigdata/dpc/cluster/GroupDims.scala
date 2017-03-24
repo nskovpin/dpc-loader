@@ -43,20 +43,19 @@ object GroupDims {
     val sc = new SparkContext(sparkConf)
     println(">>>>>SparkContext end")
 
-    val timeKey = clusterProperties.getTimeKey.toString(ClusterProperties.TIME_KEY_PATTERN)
+    val timeKey = clusterProperties.getTimeKey
 
-    val loadJson = LoadSequenceFile.loadDataSource(sc, "/user/nskovpin/tech_dpc_bgd_ms/dpc/20160203")
-    println(loadJson.count())
-    val loadEmpty = LoadSequenceFile.loadDataSource(sc, "/user/nskovpin/json/emptyDir")
-    print(loadEmpty.count())
-
-//    ClusterExecutor.execute(sc, fs, LoadSequenceFile,
-//      clusterProperties.getHdfsJsonPath,
-//      clusterProperties.getHdfsOutputDir,
-//      timeKey)
+    ClusterExecutor.execute(sc, fs, LoadSequenceFile,
+      clusterProperties.getHdfsJsonPath,
+      clusterProperties.getHdfsOutputDir,
+      timeKey)
 
     println(">>>>>DPC_LOADER_END<<<<<")
     sc.stop()
+  }
+
+  def loadDataTest(sc:SparkContext, path: String, save: String): Unit ={
+    LoadTextFile.loadDataSource(sc, path).map(x => ("0",x)).saveAsSequenceFile(save)
   }
 
 }

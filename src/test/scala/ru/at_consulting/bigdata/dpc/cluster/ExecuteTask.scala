@@ -34,7 +34,7 @@ class ExecuteTask extends SparkTestUtils with Matchers {
     )
     val clusterProperties = new ClusterProperties(args)
 
-    val timeKey = clusterProperties.getTimeKey.toString(ClusterProperties.TIME_KEY_PATTERN)
+    val timeKey = clusterProperties.getTimeKey
 
     ClusterExecutor.execute(sc, fs, LoadSequenceFile,
       clusterProperties.getHdfsJsonPath,
