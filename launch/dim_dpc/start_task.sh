@@ -66,6 +66,12 @@ hive \
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
+-hivevar LOCATION=${OUTPUT_DIR}\productMap \
+-f hive/create_dim_product_map.hql;
+
+hive \
+-hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
+-hivevar DIGITAL=${DIGITAL} \
 -hivevar LOCATION=${OUTPUT_DIR}\externalRegionMapping \
 -f hive/create_dim_external_region_mapping.hql;
 

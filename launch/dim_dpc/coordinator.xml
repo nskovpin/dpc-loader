@@ -30,6 +30,10 @@
                     <name>DATE_1D</name> 	
                        <value>${coord:formatTime(coord:dateOffset(coord:nominalTime(), -1, 'DAY'), 'yyyyMMdd')}</value>
                 </property>
+                <property>
+                     <name>DATE_1D_FORMATED</name>
+                        <value>${coord:formatTime(coord:dateOffset(coord:nominalTime(), -1, 'DAY'), 'yyyy-MM-dd')}</value>
+                </property>
         </configuration>	
         </workflow>	
 		<sla:info>

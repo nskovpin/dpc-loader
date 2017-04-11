@@ -79,10 +79,10 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_product.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+			<param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/product/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/product/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="alter_create_dim_marketing_product"/>
         <error to="kill"/>
@@ -105,10 +105,10 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_marketing_product.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/marketingProduct/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/marketingProduct/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="alter_create_dim_web_entity"/>
         <error to="kill"/>
@@ -131,10 +131,10 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_web_entity.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/webEntity/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/webEntity/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="alter_create_dim_product_region_link"/>
         <error to="kill"/>
@@ -157,10 +157,10 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_product_region_link.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/productRegionLink/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/productRegionLink/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="alter_create_dim_region"/>
         <error to="kill"/>
@@ -183,10 +183,36 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_region.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/region/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/region/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
+        </hive>
+        <ok to="alter_create_dim_product_map"/>
+        <error to="kill"/>
+    </action>
+
+    <action name="alter_create_dim_product_map" cred="hive_cred">
+        <hive xmlns="uri:oozie:hive-action:0.2">
+            <job-tracker>${JOB_TRACKER}</job-tracker>
+            <name-node>${NAME_NODE}</name-node>
+            <job-xml>${WORKING_DIR}/hive-site.xml</job-xml>
+            <configuration>
+                <property>
+                    <name>mapreduce.job.queuename</name>
+                    <value>${QUEUE_NAME}</value>
+                </property>
+                <property>
+                    <name>oozie.hive.defaults</name>
+                    <value>hive-config.xml</value>
+                </property>
+            </configuration>
+            <script>${WORKING_DIR}/hive/alter_create_dim_product_map.q</script>
+            <param>DIGITAL=${DIGITAL}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
+            <param>INPUT_DIR=${OUTPUT_DIR}/productMap/${DATE_1D}</param>
+            <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/productMap/${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="alter_create_dim_external_region_mapping"/>
         <error to="kill"/>
@@ -209,10 +235,10 @@
             </configuration>
             <script>${WORKING_DIR}/hive/alter_create_dim_external_region_mapping.q</script>
             <param>DIGITAL=${DIGITAL}</param>
-			<param>TIME_KEY=${DATE_1D}</param>
+            <param>EXPIRATION_DATE=${DATE_1D_FORMATED}</param>
             <param>INPUT_DIR=${OUTPUT_DIR}/externalRegionMapping/${DATE_1D}</param>
             <param>INPUT_OPENED_DIR=${OUTPUT_DIR}/externalRegionMapping/${DATE_OPENED}</param>
-            <param>DATE_OPENED=${DATE_OPENED}</param>
+            <param>DATE_OPENED=${DATE_OPENED_FORMATED}</param>
         </hive>
         <ok to="end"/>
         <error to="kill"/>
