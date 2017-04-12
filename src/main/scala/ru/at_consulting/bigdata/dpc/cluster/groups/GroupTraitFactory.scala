@@ -19,6 +19,8 @@ object GroupTraitFactory {
     } else if (clazz == classOf[RegionDim]) {
       return CommonGroup
     } else if (clazz == classOf[WebEntityDim]) {
+      return CommonGroup
+    } else if (clazz == classOf[ProductMapDim]) {
       return DoubleGroup
     }
     throw new RuntimeException("Don't know this class type:" + clazz)

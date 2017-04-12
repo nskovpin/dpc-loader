@@ -30,7 +30,6 @@ public class WebEntityDimCreator implements DimCreator<WebEntityDim, WebEntity> 
     public WebEntityDim create(DpcRoot dpcRoot, WebEntity parent) {
         WebEntityDim webEntityDim = new WebEntityDim();
         webEntityDim.setEntityId(parent.getEntityId());
-        webEntityDim.setProductId(dpcRoot.getProductInfo().getProducts().getProduct().getId());
         webEntityDim.setSoc(parent.getSoc());
         webEntityDim.setEntityType(parent.getEntityType());
         webEntityDim.setBusinessType(parent.getBusinessType());

@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface DateToString {
 
-    String pattern() default "YYYY.MM.dd";
+    String pattern() default "YYYY-MM-dd";
 
 }

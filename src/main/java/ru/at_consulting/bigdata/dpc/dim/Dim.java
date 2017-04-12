@@ -18,4 +18,6 @@ public @interface Dim {
 
     String nullable() default "\\N";
 
+    String collectionDelimiter() default "\\|";
+
 }

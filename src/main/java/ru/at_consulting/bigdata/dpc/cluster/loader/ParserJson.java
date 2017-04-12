@@ -81,13 +81,16 @@ public class ParserJson {
 
             }
 
+            List<ProductMapDim> productMapDimList = new ArrayList<>();
+            ProductMapDimCreator productMapDimCreator = DimCreatorFactory.getProductMapDimCreator();
+
+            List<WebEntityDim> webEntityDimList = null;
             if (dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities() != null) {
 
                 DimCreator<WebEntityDim, WebEntity> webEntityCreator = DimCreatorFactory.getCreator(WebEntityDim.class);
-                List<WebEntityDim> webEntityDimList = webEntityCreator.create(dpcRoot,
+                webEntityDimList = webEntityCreator.create(dpcRoot,
                         dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities());
                 parsedDimsHolder.setWebEntityDimList(webEntityDimList);
-
             }
 
             Regions regions = dpcRoot.getProductInfo().getProducts().getProduct().getRegions();
@@ -97,11 +100,11 @@ public class ParserJson {
                 DimCreator<ProductRegionLinkDim, Region> productRegionLinkCreator = DimCreatorFactory.getCreator(ProductRegionLinkDim.class);
 
                 List<RegionDim> regionDimList = null;
-                DimCreator<RegionDim, Region> regionDimCreator = new RegionDimCreator();
+                DimCreator<RegionDim, Region> regionDimCreator = DimCreatorFactory.getCreator(RegionDim.class);
 
                 List<ExternalRegionMappingDim> externalRegionMappingDimList = null;
                 DimCreator<ExternalRegionMappingDim, ExternalRegionMapping> externalRegionMappingDimCreator
-                        = DimCreatorFactory.getCreator(ExternalRegionMappingDim.class);;
+                        = DimCreatorFactory.getCreator(ExternalRegionMappingDim.class);
 
                 for (Region region : regions.getRegion()) {
                     if (productRegionLinkDimList == null) {
@@ -114,12 +117,13 @@ public class ParserJson {
                     }
                     regionDimList.add(regionDimCreator.create(dpcRoot, region));
 
+                    List<ExternalRegionMappingDim> subExternalMapping = null;
                     if (region.getExternalRegionMappings() != null && region.getExternalRegionMappings().getExternalRegionMapping() != null) {
 
                         if (externalRegionMappingDimList == null) {
                             externalRegionMappingDimList = new ArrayList<>();
                         }
-                        List<ExternalRegionMappingDim> subExternalMapping = externalRegionMappingDimCreator.create(dpcRoot,
+                        subExternalMapping = externalRegionMappingDimCreator.create(dpcRoot,
                                 region.getExternalRegionMappings());
 
                         for (ExternalRegionMappingDim sub : subExternalMapping) {
@@ -128,12 +132,18 @@ public class ParserJson {
 
                         externalRegionMappingDimList.addAll(subExternalMapping);
                     }
+
+                    productMapDimList.addAll(productMapDimCreator.create(dpcRoot, region, webEntityDimList, subExternalMapping));
                 }
 
                 parsedDimsHolder.setProductRegionLinkDimList(productRegionLinkDimList);
                 parsedDimsHolder.setRegionDimList(regionDimList);
                 parsedDimsHolder.setExternalRegionMappingDimList(externalRegionMappingDimList);
+            }else{
+                productMapDimList.addAll(productMapDimCreator.create(dpcRoot, null, webEntityDimList, null));
             }
+
+            parsedDimsHolder.setProductMapDimList(productMapDimList);
         }
         return parsedDimsHolder;
     }
@@ -218,6 +228,8 @@ public class ParserJson {
         private List<RegionDim> regionDimList;
 
         private List<ExternalRegionMappingDim> externalRegionMappingDimList;
+
+        private List<ProductMapDim> productMapDimList;
     }
 
 

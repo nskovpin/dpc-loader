@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileSystem
+import org.apache.spark.rdd.RDD
 import org.scalatest.Matchers
 import ru.at_consulting.bigdata.dpc.cluster.loaders.LoadSequenceFile
 import ru.at_consulting.bigdata.dpc.cluster.system.ClusterProperties
@@ -16,12 +17,13 @@ import ru.at_consulting.bigdata.dpc.cluster.utils.SparkTestUtils
   */
 class ExecuteTask extends SparkTestUtils with Matchers {
 
-  val jsonPath: String = Paths.get("src/test/resources/scala/executor/tech_dpc_bgd_ms/dpc/20150101/data1.sf").toString
+  val jsonPath: String = Paths.get("src/test/resources/scala/executor/tech_dpc_bgd_ms/dpc/20150114/111.sf").toString
   val outputPath: String = Paths.get("src/test/resources/scala/executor/out").toString
   val result = "src/test/resources/scala/external/out/result"
 
 
   sparkTest("ExternalDimTest") {
+
     println("Test 1")
 
     val conf = new Configuration()
@@ -30,7 +32,7 @@ class ExecuteTask extends SparkTestUtils with Matchers {
       "PROJECT_NAME=dpc_loader",
       "HDFS_JSON_PATH="+jsonPath,
       "HDFS_OUTPUT_DIR="+outputPath,
-      "TIME_KEY=20150101"
+      "TIME_KEY=20150114"
     )
     val clusterProperties = new ClusterProperties(args)
 

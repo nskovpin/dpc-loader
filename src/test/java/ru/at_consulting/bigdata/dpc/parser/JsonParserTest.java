@@ -39,13 +39,13 @@ public class JsonParserTest {
     public void stringifyDate(){
         ProductDim productDim = new ProductDim();
 
-        productDim.setExpirationDate("2999.12.31");
+        productDim.setExpirationDate("2999-12-31");
         String date1 = productDim.stringifyExpirationDate();
-        Assert.assertTrue(date1.equals("2999.12.31"));
+        Assert.assertTrue(date1.equals("2999-12-31"));
 
         productDim.setExpirationDate("2017-02-02T13:41:24.0767007+03:00");
         String date2 = productDim.stringifyExpirationDate();
-        Assert.assertTrue(date2.equals("2017.02.02"));
+        Assert.assertTrue(date2.equals("2017-02-02"));
 
     }
 
@@ -123,7 +123,26 @@ public class JsonParserTest {
         }
         Files.write(Paths.get(out + File.separator + "web"), allWebs.getBytes());
 
+        String productMaps = "";
+        for(ProductMapDim s : parsedDimsHolder.getProductMapDimList()){
+            productMaps += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "productMap"), productMaps.getBytes());
     }
+
+
+    @Test
+    public void realJsonParse2() throws URISyntaxException, IOException {
+        String jsonName = "json/trueJson2";
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        DpcRoot dpcRoot = mapper.readValue(Files.newInputStream(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI())), DpcRoot.class);
+
+        ParserJson parserJson = new ParserJson();
+        ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
+        Assert.assertTrue(parsedDimsHolder != null);
+        Assert.assertTrue(parsedDimsHolder.getRegionDimList().size() > 10);
+    }
+
 
     @Test
     public void readAllJsonParse() throws URISyntaxException, IOException {
@@ -140,6 +159,53 @@ public class JsonParserTest {
             Assert.assertTrue(parsedDimsHolder != null);
         }
         Assert.assertTrue(list.size() > 500);
+
+        List<WebEntityDim> webEntityDimList = new ArrayList<>();
+        for(ParserJson.ParsedDimsHolder parsedDimsHolder: list){
+            if(parsedDimsHolder.getWebEntityDimList()!= null){
+                webEntityDimList.addAll(parsedDimsHolder.getWebEntityDimList());
+            }
+        }
+        Assert.assertNotNull(webEntityDimList);
+        String out = "src/test/resources/parsed";
+
+        String allWebs = "";
+        for(WebEntityDim s : webEntityDimList){
+            allWebs += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "webList"), allWebs.getBytes());
+    }
+
+    @Test
+    public void readAllJsonParse3() throws URISyntaxException, IOException {
+        String jsonName = "json/14dpc.csv";
+        ObjectMapper mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        List<String> lines = Files.readAllLines(Paths.get(JsonParserTest.class.getResource("/" + jsonName).toURI()), Charset.forName("UTF-8"));
+
+        List<ParserJson.ParsedDimsHolder> list = new ArrayList<>();
+        for(String line: lines){
+            DpcRoot dpcRoot = mapper.readValue(line, DpcRoot.class);
+            ParserJson parserJson = new ParserJson();
+            ParserJson.ParsedDimsHolder parsedDimsHolder = parserJson.parseDcpRoot(dpcRoot);
+            list.add(parsedDimsHolder);
+            Assert.assertTrue(parsedDimsHolder != null);
+        }
+        Assert.assertTrue(list.size() > 0);
+
+        List<WebEntityDim> webEntityDimList = new ArrayList<>();
+        for(ParserJson.ParsedDimsHolder parsedDimsHolder: list){
+            if(parsedDimsHolder.getWebEntityDimList()!= null){
+                webEntityDimList.addAll(parsedDimsHolder.getWebEntityDimList());
+            }
+        }
+        Assert.assertNotNull(webEntityDimList);
+        String out = "src/test/resources/parsed";
+
+        String allWebs = "";
+        for(WebEntityDim s : webEntityDimList){
+            allWebs += s.stringify() + "\n";
+        }
+        Files.write(Paths.get(out + File.separator + "webList3"), allWebs.getBytes());
     }
 
     @Test

@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface DimEntity extends Serializable, Identifiable{
 
-    String EXPIRATION_DATE_INFINITY = "2999.12.31";
+    String EXPIRATION_DATE_INFINITY = "2999-12-31";
 
     List<Field> getFields();
 

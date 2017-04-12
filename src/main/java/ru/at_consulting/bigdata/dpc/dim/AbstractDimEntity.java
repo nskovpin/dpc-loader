@@ -33,6 +33,7 @@ public abstract class AbstractDimEntity implements DimEntity {
             if (dimMeta != null) {
                 String delimiter = dimMeta.delimiter();
                 String nullable = dimMeta.nullable();
+                String collectionDelimiter = dimMeta.collectionDelimiter();
 
                 String[] fieldValuesArray = input.split(delimiter, -1);
                 for (int i = 0; i < fieldList.size(); i++) {
@@ -45,7 +46,7 @@ public abstract class AbstractDimEntity implements DimEntity {
                     if (value.equals(nullable)) {
                         object = null;
                     } else if (fieldList.get(i).getType() == List.class) {
-                        object = new ArrayList<>(Arrays.asList(value.split(",", -1)));
+                        object = new ArrayList<>(Arrays.asList(value.split(collectionDelimiter, -1)));
                     } else {
                         object = fieldList.get(i).getType().getConstructor(String.class).newInstance(value);
                     }
@@ -65,6 +66,7 @@ public abstract class AbstractDimEntity implements DimEntity {
         if (dimMeta != null) {
             String delimiter = dimMeta.delimiter();
             String nullable = dimMeta.nullable();
+            String collectionDelimiter = dimMeta.collectionDelimiter();
 
             List<Field> fieldList = getFields();
             for (Field field : fieldList) {
@@ -74,7 +76,7 @@ public abstract class AbstractDimEntity implements DimEntity {
                 field.setAccessible(true);
                 try {
                     Object value = field.get(this);
-                    appendToBuilder(stringBuilder, delimiter, nullable, field, value);
+                    appendToBuilder(stringBuilder, delimiter, collectionDelimiter, nullable, field, value);
                 } catch (IllegalAccessException e) {
                     LOGGER.error("Can't get field value:" + this.toString());
                     e.printStackTrace();
@@ -105,7 +107,7 @@ public abstract class AbstractDimEntity implements DimEntity {
         throw new RuntimeException("Class doesn't have a field");
     }
 
-    private void appendToBuilder(StringBuilder stringBuilder, String delimiter, String nullable,
+    private void appendToBuilder(StringBuilder stringBuilder, String delimiter, String collectionDelimiter, String nullable,
                                  Field field, Object value) {
         if (value == null) {
             value = nullable;
@@ -118,7 +120,7 @@ public abstract class AbstractDimEntity implements DimEntity {
                 if (mergedValue.length() == 0) {
                     mergedValue.append(listValue);
                 } else {
-                    mergedValue.append(",").append(listValue);
+                    mergedValue.append(collectionDelimiter.replace("\\","")).append(listValue);
                 }
             }
             value = mergedValue.toString();

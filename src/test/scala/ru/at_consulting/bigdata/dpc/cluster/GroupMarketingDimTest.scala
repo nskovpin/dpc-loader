@@ -35,9 +35,12 @@ class GroupMarketingDimTest extends SparkTestUtils with Matchers {
 
     val result = ClusterExecutor.executeGroups(newRdd, historyRdd, sc, classOf[MarketingProductDim])
     assert(result.count() > 0)
+    val r = result.collect()
 
     val result1 = result.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
     val result2 = result.filter(x => !x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
+
+
 
     val expected1 = sc.textFile(resultPath + "1")
     val expected2 = sc.textFile(resultPath + "2")

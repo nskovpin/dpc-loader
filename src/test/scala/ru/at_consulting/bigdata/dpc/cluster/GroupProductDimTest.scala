@@ -61,17 +61,13 @@ class GroupProductDimTest extends SparkTestUtils with Matchers {
 
     val newRdd = ClusterExecutor.loadAggregate(sc, fs, LoadSequenceFile, productDimEmptyPath, classOf[ProductDim])
     assert(newRdd.count() == 0)
+
+    val historyRdd = ClusterExecutor.loadAggregate(sc, fs, LoadTextFile, productDimEmptyPath, classOf[ProductDim])
+    assert(historyRdd.count() == 0)
+
+    val result = ClusterExecutor.executeGroups(newRdd, historyRdd, sc, classOf[ProductDim])
+    assert(result.count()== 0)
   }
-//
-//
-//  sparkTest("ProductDimTest: new is empty2") {
-//    println("Test 2")
-//    val conf = new Configuration()
-//    val fs = FileSystem.get(conf)
-//
-//    val newRdd = ClusterExecutor.loadAggregate(sc, fs, LoadTextFile, productDimEmptyPath2, classOf[ProductDim])
-//    assert(newRdd.count() == 0)
-//  }
 
 
 }

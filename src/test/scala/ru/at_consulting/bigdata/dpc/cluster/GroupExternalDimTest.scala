@@ -20,7 +20,6 @@ class GroupExternalDimTest extends SparkTestUtils with Matchers {
   val historyExternalDimPath: String = Paths.get("src/test/resources/scala/in/history").toString
   val resultPath = "src/test/resources/scala/out/external/result"
 
-
   sparkTest("ExternalDimTest") {
     println("Test 1")
     val conf = new Configuration()
@@ -36,6 +35,7 @@ class GroupExternalDimTest extends SparkTestUtils with Matchers {
 
     val result = ClusterExecutor.executeGroups(newRdd, historyRdd, sc, classOf[ExternalRegionMappingDim])
     assert(result.count() > 0)
+    val res = result.collect()
 
     val result1 = result.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
     val result2 = result.filter(x => !x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
@@ -49,5 +49,6 @@ class GroupExternalDimTest extends SparkTestUtils with Matchers {
     result2.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected2.collect().sortWith((a, b) => a.compare(b) >= 0))
 
   }
+
 
 }

@@ -16,7 +16,6 @@ import ru.at_consulting.bigdata.dpc.dim.{DimEntity, ExternalRegionMappingDim, Pr
   */
 class GroupWebDimTest extends SparkTestUtils with Matchers {
 
-  System.setProperty("hadoop.home.dir", "C:\\winutil\\")
 
   val newWebDimPath: String = Paths.get("src/test/resources/scala/in/new").toString
   val historyWebDimPath: String = Paths.get("src/test/resources/scala/in/history").toString
@@ -32,11 +31,12 @@ class GroupWebDimTest extends SparkTestUtils with Matchers {
     val collectionNew = newRdd.collect()
 
     val historyRdd = ClusterExecutor.loadAggregate(sc, fs, LoadTextFile, historyWebDimPath, classOf[WebEntityDim])
-    assert(historyRdd.count() > 0)
+//    assert(historyRdd.count() > 0)
     val collectionHist = historyRdd.collect()
 
     val result = ClusterExecutor.executeGroups(newRdd, historyRdd, sc, classOf[WebEntityDim])
     assert(result.count() > 0)
+    val col = result.collect();
 
     val result1 = result.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
     val result2 = result.filter(x => !x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)

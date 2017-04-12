@@ -46,16 +46,18 @@ object ClusterExecutor {
       val productRegionLinkDimList = parsedDimsHolder.getProductRegionLinkDimList
       val regionDimList = parsedDimsHolder.getRegionDimList
       val webEntityDimList = parsedDimsHolder.getWebEntityDimList
+      val productMapDimList = parsedDimsHolder.getProductMapDimList
 
-      (productDim, externalRegionDimList, marketingProductDim, productRegionLinkDimList, regionDimList, webEntityDimList)
+      (productDim, externalRegionDimList, marketingProductDim, productRegionLinkDimList, regionDimList, webEntityDimList, productMapDimList)
     }).persist()
 
-    var newProductRdd = parsedRDDS.filter(x => x != null).map(x => x._1.asInstanceOf[DimEntity])
-    var newExternalRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._2)).flatMapValues(x => convertToList(x)).map(x => x._2)
-    var newMarketingRdd = parsedRDDS.filter(x => x != null).map(x => x._3.asInstanceOf[DimEntity])
-    var newProductRegionLinkRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._4)).flatMapValues(x => convertToList(x)).map(x => x._2)
-    var newRegionRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._5)).flatMapValues(x => convertToList(x)).map(x => x._2)
-    var newWebEntityRdd = parsedRDDS.filter(x => x != null).map(x => ("", x._6)).flatMapValues(x => convertToList(x)).map(x => x._2)
+    var newProductRdd = parsedRDDS.filter(x => x != null).filter(x => x._1 != null).map(x => x._1.asInstanceOf[DimEntity])
+    var newExternalRdd = parsedRDDS.filter(x => x != null).filter(x => x._2 != null).map(x => ("", x._2)).flatMapValues(x => convertToList(x)).map(x => x._2)
+    var newMarketingRdd = parsedRDDS.filter(x => x != null).filter(x => x._3 != null).map(x => x._3.asInstanceOf[DimEntity])
+    var newProductRegionLinkRdd = parsedRDDS.filter(x => x != null).filter(x => x._4 != null).map(x => ("", x._4)).flatMapValues(x => convertToList(x)).map(x => x._2)
+    var newRegionRdd = parsedRDDS.filter(x => x != null).filter(x => x._5 != null).map(x => ("", x._5)).flatMapValues(x => convertToList(x)).map(x => x._2)
+    var newWebEntityRdd = parsedRDDS.filter(x => x != null).filter(x => x._6 != null).map(x => ("", x._6)).flatMapValues(x => convertToList(x)).map(x => x._2)
+    var newProductMapRdd = parsedRDDS.filter(x => x != null).filter(x => x._7 != null).map(x => ("", x._7)).flatMapValues(x => convertToList(x)).map(x => x._2)
 
     var product: RDD[(String, String)] = null
     var external: RDD[(String, String)] = null
@@ -63,6 +65,7 @@ object ClusterExecutor {
     var link: RDD[(String, String)] = null
     var region: RDD[(String, String)] = null
     var web: RDD[(String, String)] = null
+    var productMap: RDD[(String, String)] = null
 
     var historyProductRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ProductDim], openDate)
     var historyExternalRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ExternalRegionMappingDim], openDate)
@@ -70,6 +73,7 @@ object ClusterExecutor {
     var historyProductRegionLinkRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ProductRegionLinkDim], openDate)
     var historyRegionRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[RegionDim], openDate)
     var historyWebEntityRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[WebEntityDim], openDate)
+    var historyProductMapRdd = loadAggregate(sc, hdfs, loader, aggregatePath, classOf[ProductMapDim], openDate)
 
     product = executeGroups(newProductRdd, historyProductRdd, sc, classOf[ProductDim])
     external = executeGroups(newExternalRdd, historyExternalRdd, sc, classOf[ExternalRegionMappingDim])
@@ -77,14 +81,30 @@ object ClusterExecutor {
     link = executeGroups(newProductRegionLinkRdd, historyProductRegionLinkRdd, sc, classOf[ProductRegionLinkDim])
     region = executeGroups(newRegionRdd, historyRegionRdd, sc, classOf[RegionDim])
     web = executeGroups(newWebEntityRdd, historyWebEntityRdd, sc, classOf[WebEntityDim])
+    productMap = executeGroups(newProductMapRdd, historyProductMapRdd, sc, classOf[ProductMapDim])
 
     if (!test) {
-      saveAggregate(product, hdfs, aggregatePath, classOf[ProductDim], timeKey, openDate)
-      saveAggregate(external, hdfs, aggregatePath, classOf[ExternalRegionMappingDim], timeKey, openDate)
-      saveAggregate(market, hdfs, aggregatePath, classOf[MarketingProductDim], timeKey, openDate)
-      saveAggregate(link, hdfs, aggregatePath, classOf[ProductRegionLinkDim], timeKey, openDate)
-      saveAggregate(region, hdfs, aggregatePath, classOf[RegionDim], timeKey, openDate)
-      saveAggregate(web, hdfs, aggregatePath, classOf[WebEntityDim], timeKey, openDate)
+      if(product != null){
+        saveAggregate(product, hdfs, aggregatePath, classOf[ProductDim], timeKey, openDate)
+      }
+      if(external != null){
+        saveAggregate(external, hdfs, aggregatePath, classOf[ExternalRegionMappingDim], timeKey, openDate)
+      }
+      if(market != null){
+        saveAggregate(market, hdfs, aggregatePath, classOf[MarketingProductDim], timeKey, openDate)
+      }
+      if(link != null){
+        saveAggregate(link, hdfs, aggregatePath, classOf[ProductRegionLinkDim], timeKey, openDate)
+      }
+      if(region != null){
+        saveAggregate(region, hdfs, aggregatePath, classOf[RegionDim], timeKey, openDate)
+      }
+      if(web != null){
+        saveAggregate(web, hdfs, aggregatePath, classOf[WebEntityDim], timeKey, openDate)
+      }
+      if(productMap != null){
+        saveAggregate(productMap, hdfs, aggregatePath, classOf[ProductMapDim], timeKey, openDate)
+      }
     }
   }
 

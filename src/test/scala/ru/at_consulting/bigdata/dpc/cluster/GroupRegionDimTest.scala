@@ -41,6 +41,9 @@ class GroupRegionDimTest extends SparkTestUtils with Matchers {
     val result1 = result.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
     val result2 = result.filter(x => !x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)
 
+    val r1 = result1.collect()
+    val r2 = result2.collect()
+
     val expected1 = sc.textFile(resultPath + "1")
     val expected2 = sc.textFile(resultPath + "2")
     writeToFile("src/test/resources/scala/region1", result1.collect().mkString("\n"))

@@ -17,11 +17,13 @@ public class CompareObjectTest {
         productNewDim.setType("type");
         productNewDim.setMarketingProductId("id");
         productNewDim.setId("1");
+        productNewDim.setEffectiveDate("asd");
 
         ProductDim productExistingDim = new ProductDim();
         productExistingDim.setType("type");
         productExistingDim.setMarketingProductId("id");
         productExistingDim.setId("2");
+        productNewDim.setEffectiveDate("asd1");
 
         ProductDimComparator productDimResolver = new ProductDimComparator();
         Pair<ProductDim, ProductDim> products = productDimResolver.resolve(productNewDim, productExistingDim);

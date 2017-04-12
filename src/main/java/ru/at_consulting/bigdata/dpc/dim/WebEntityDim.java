@@ -10,12 +10,10 @@ import lombok.Setter;
 @Dim(name = "webEntity")
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "entityId", "productId"}, callSuper = false)
+@EqualsAndHashCode(exclude = {"effectiveDate", "expirationDate", "entityId"}, callSuper = false)
 public class WebEntityDim extends AbstractDimEntity implements Identifiable{
 
     private String entityId;
-
-    private String productId;
 
     private String soc;
 
@@ -35,6 +33,6 @@ public class WebEntityDim extends AbstractDimEntity implements Identifiable{
 
     @Override
     public String getFirstId() {
-        return null;
+        return entityId;
     }
 }
