@@ -20,7 +20,7 @@ import ru.at_consulting.bigdata.dpc.json.DpcRoot
 object ClusterExecutor {
 
   def execute(sc: SparkContext, hdfs: FileSystem, loader: Loader, jsonPath: String, aggregatePath: String,
-              timeKeyDateTime: DateTime, test: Boolean = false, optional: Boolean = false, openDate: String = "29991231"): Unit = {
+              timeKeyDateTime: DateTime, test: Boolean = false, optional: Boolean = false, openDate: String = "29991231"): (RDD[(String, String)], RDD[(String, String)], RDD[(String, String)], RDD[(String, String)], RDD[(String, String)], RDD[(String, String)], RDD[(String, String)]) = {
     var jsonPathNew = ""
     val timeKey = timeKeyDateTime.toString(ClusterProperties.TIME_KEY_PATTERN)
     if (!test) {
@@ -105,6 +105,9 @@ object ClusterExecutor {
       if(productMap != null){
         saveAggregate(productMap, hdfs, aggregatePath, classOf[ProductMapDim], timeKey, openDate)
       }
+      (null, null, null, null, null, null,null)
+    }else{
+      (product, external, market, link, region, web, productMap)
     }
   }
 

@@ -1,5 +1,7 @@
 package ru.at_consulting.bigdata.dpc.cluster.utils
 
+import java.io.PrintWriter
+
 import akka.event.Logging
 import org.scalatest.FunSuite
 import org.scalatest.tools.ScalaTestFramework
@@ -47,6 +49,12 @@ trait SparkTestUtils extends FunSuite {
   def writeToFile(p: String, s: String): Unit = {
     val pw = new java.io.PrintWriter(new java.io.File(p))
     try pw.write(s) finally pw.close()
+  }
+
+  def emptyFile(p: String): Unit ={
+    val writer = new PrintWriter(p)
+    writer.print("")
+    writer.close()
   }
 
 }

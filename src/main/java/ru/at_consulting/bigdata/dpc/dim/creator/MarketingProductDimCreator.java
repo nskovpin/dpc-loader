@@ -49,7 +49,7 @@ public class MarketingProductDimCreator implements DimCreator<MarketingProductDi
                 productFilterTitles.add(productFilter.getTitle());
             }
         }
-        marketingProductDim.setProductFilters(productCategoriesTitles);
+        marketingProductDim.setProductFilters(productFilterTitles);
 
         if(parent.getSegment() != null){
             marketingProductDim.setSegment(parent.getSegment().getTitle());

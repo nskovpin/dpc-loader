@@ -60,6 +60,7 @@ public class ProductMapDimCreator implements DimCreator<ProductMapDim, Region> {
         productMapDimNew.setEntityType(webEntityDim.getEntityType());
         productMapDimNew.setSoc(webEntityDim.getSoc());
         productMapDimNew.setEntityId(webEntityDim.getEntityId());
+        productMapDimNew.setPaySystemType(webEntityDim.getPaySystemType());
         return productMapDimNew;
     }
 

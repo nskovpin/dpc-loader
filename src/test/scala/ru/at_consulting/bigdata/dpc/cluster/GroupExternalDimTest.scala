@@ -42,8 +42,8 @@ class GroupExternalDimTest extends SparkTestUtils with Matchers {
 
     val expected1 = sc.textFile(resultPath + "1")
     val expected2 = sc.textFile(resultPath + "2")
-    writeToFile("src/test/resources/scala/external1", result1.collect().mkString("\n"))
-    writeToFile("src/test/resources/scala/external2", result2.collect().mkString("\n"))
+//    writeToFile("src/test/resources/scala/external1", result1.collect().mkString("\n"))
+//    writeToFile("src/test/resources/scala/external2", result2.collect().mkString("\n"))
 
     result1.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected1.collect().sortWith((a, b) => a.compare(b) >= 0))
     result2.collect().sortWith((a, b) => a.compareTo(b) >= 0) should be(expected2.collect().sortWith((a, b) => a.compare(b) >= 0))
