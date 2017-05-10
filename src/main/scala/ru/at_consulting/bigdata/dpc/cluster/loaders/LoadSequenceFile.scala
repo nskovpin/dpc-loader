@@ -10,7 +10,7 @@ import org.apache.spark.rdd.RDD
 object LoadSequenceFile extends Loader{
 
   def loadRdd(sc: SparkContext, path: String) : RDD[String] = {
-    sc.sequenceFile(path, classOf[LongWritable], classOf[Text]).
+    sc.sequenceFile(path, classOf[Long], classOf[Text]).
       map(x => x._2.toString)
   }
 
@@ -20,7 +20,7 @@ object LoadSequenceFile extends Loader{
   }
 
   override def loadDataSource(sc: SparkContext, path: String, delimiter: String): RDD[Array[String]] ={
-    loadRddRows(sc, path , delimiter);
+    loadRddRows(sc, path , delimiter)
   }
 
   override def loadDataSource(sc: SparkContext, path: String): RDD[String] = {

@@ -44,14 +44,18 @@ object GroupDims {
     println(">>>>>SparkContext end")
 
     val timeKey = clusterProperties.getTimeKey
+    val loggerPath = clusterProperties.getHdfsLoggerPath
 
     ClusterExecutor.execute(sc, fs, LoadSequenceFile,
       clusterProperties.getHdfsJsonPath,
       clusterProperties.getHdfsOutputDir,
+      loggerPath,
       timeKey)
 
     println(">>>>>DPC_LOADER_END<<<<<")
     sc.stop()
+
+    ClusterExecutor.replaceTempFolder(fs, clusterProperties.getHdfsOutputDir, loggerPath, "29991231")
   }
 
   def loadDataTest(sc:SparkContext, path: String, save: String): Unit ={

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.at_consulting.bigdata.dpc.dim.*;
 import ru.at_consulting.bigdata.dpc.dim.creator.*;
 import ru.at_consulting.bigdata.dpc.json.DpcRoot;
@@ -28,8 +30,9 @@ import java.util.List;
  * Created by NSkovpin on 02.03.2017.
  */
 public class ParserJson {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParserJson.class);
 
-    public ParserJson(){
+    public ParserJson() {
 
     }
 
@@ -57,93 +60,96 @@ public class ParserJson {
 
     public ParsedDimsHolder parseDcpRoot(DpcRoot dpcRoot) {
         ParsedDimsHolder parsedDimsHolder = new ParsedDimsHolder();
+        try {
+            if (dpcRoot.getProductInfo() != null && dpcRoot.getProductInfo().getProducts() != null &&
+                    dpcRoot.getProductInfo().getProducts().getProduct() != null && dpcRoot.getAction() != null) {
+                DimCreator<ProductDim, Product> productCreator = DimCreatorFactory.getCreator(ProductDim.class);
+                ProductDim productDim = productCreator.create(dpcRoot,
+                        dpcRoot.getProductInfo().getProducts().getProduct());
+                parsedDimsHolder.setProductDim(productDim);
 
-        if (dpcRoot.getProductInfo() != null && dpcRoot.getProductInfo().getProducts() != null &&
-                dpcRoot.getProductInfo().getProducts().getProduct() != null && dpcRoot.getAction() != null) {
-            DimCreator<ProductDim, Product> productCreator = DimCreatorFactory.getCreator(ProductDim.class);
-            ProductDim productDim = productCreator.create(dpcRoot,
-                    dpcRoot.getProductInfo().getProducts().getProduct());
-            parsedDimsHolder.setProductDim(productDim);
-
-            if (dpcRoot.getAction().equals(DpcRoot.PUT)) {
-                parsedDimsHolder.setDelete(false);
-            } else if (dpcRoot.getAction().equals(DpcRoot.DELETE)) {
-                parsedDimsHolder.setDelete(true);
-                return parsedDimsHolder;
-            }
-
-            if (dpcRoot.getProductInfo().getProducts().getProduct().getMarketingProduct() != null) {
-
-                DimCreator<MarketingProductDim, MarketingProduct> marketingCreator = DimCreatorFactory.getCreator(MarketingProductDim.class);
-                MarketingProductDim marketingProductDim = marketingCreator.create(dpcRoot,
-                        dpcRoot.getProductInfo().getProducts().getProduct().getMarketingProduct());
-                parsedDimsHolder.setMarketingProductDim(marketingProductDim);
-
-            }
-
-            List<ProductMapDim> productMapDimList = new ArrayList<>();
-            ProductMapDimCreator productMapDimCreator = DimCreatorFactory.getProductMapDimCreator();
-
-            List<WebEntityDim> webEntityDimList = null;
-            if (dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities() != null) {
-
-                DimCreator<WebEntityDim, WebEntity> webEntityCreator = DimCreatorFactory.getCreator(WebEntityDim.class);
-                webEntityDimList = webEntityCreator.create(dpcRoot,
-                        dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities());
-                parsedDimsHolder.setWebEntityDimList(webEntityDimList);
-            }
-
-            Regions regions = dpcRoot.getProductInfo().getProducts().getProduct().getRegions();
-            if (regions != null && regions.getRegion() != null) {
-
-                List<ProductRegionLinkDim> productRegionLinkDimList = null;
-                DimCreator<ProductRegionLinkDim, Region> productRegionLinkCreator = DimCreatorFactory.getCreator(ProductRegionLinkDim.class);
-
-                List<RegionDim> regionDimList = null;
-                DimCreator<RegionDim, Region> regionDimCreator = DimCreatorFactory.getCreator(RegionDim.class);
-
-                List<ExternalRegionMappingDim> externalRegionMappingDimList = null;
-                DimCreator<ExternalRegionMappingDim, ExternalRegionMapping> externalRegionMappingDimCreator
-                        = DimCreatorFactory.getCreator(ExternalRegionMappingDim.class);
-
-                for (Region region : regions.getRegion()) {
-                    if (productRegionLinkDimList == null) {
-                        productRegionLinkDimList = new ArrayList<>();
-                    }
-                    productRegionLinkDimList.add(productRegionLinkCreator.create(dpcRoot, region));
-
-                    if (regionDimList == null) {
-                        regionDimList = new ArrayList<>();
-                    }
-                    regionDimList.add(regionDimCreator.create(dpcRoot, region));
-
-                    List<ExternalRegionMappingDim> subExternalMapping = null;
-                    if (region.getExternalRegionMappings() != null && region.getExternalRegionMappings().getExternalRegionMapping() != null) {
-
-                        if (externalRegionMappingDimList == null) {
-                            externalRegionMappingDimList = new ArrayList<>();
-                        }
-                        subExternalMapping = externalRegionMappingDimCreator.create(dpcRoot,
-                                region.getExternalRegionMappings());
-
-                        for (ExternalRegionMappingDim sub : subExternalMapping) {
-                            sub.setRegionId(region.getId());
-                        }
-
-                        externalRegionMappingDimList.addAll(subExternalMapping);
-                    }
-
-                    productMapDimList.addAll(productMapDimCreator.create(dpcRoot, region, webEntityDimList, subExternalMapping));
+                if (dpcRoot.getAction().equals(DpcRoot.PUT)) {
+                    parsedDimsHolder.setDelete(false);
+                } else if (dpcRoot.getAction().equals(DpcRoot.DELETE)) {
+                    parsedDimsHolder.setDelete(true);
+                    return parsedDimsHolder;
                 }
 
-                parsedDimsHolder.setProductRegionLinkDimList(productRegionLinkDimList);
-                parsedDimsHolder.setRegionDimList(regionDimList);
-                parsedDimsHolder.setExternalRegionMappingDimList(externalRegionMappingDimList);
-            }else{
-                productMapDimList.addAll(productMapDimCreator.create(dpcRoot, null, webEntityDimList, null));
-            }
+                if (dpcRoot.getProductInfo().getProducts().getProduct().getMarketingProduct() != null) {
 
-            parsedDimsHolder.setProductMapDimList(productMapDimList);
+                    DimCreator<MarketingProductDim, MarketingProduct> marketingCreator = DimCreatorFactory.getCreator(MarketingProductDim.class);
+                    MarketingProductDim marketingProductDim = marketingCreator.create(dpcRoot,
+                            dpcRoot.getProductInfo().getProducts().getProduct().getMarketingProduct());
+                    parsedDimsHolder.setMarketingProductDim(marketingProductDim);
+
+                }
+
+                List<ProductMapDim> productMapDimList = new ArrayList<>();
+                ProductMapDimCreator productMapDimCreator = DimCreatorFactory.getProductMapDimCreator();
+
+                List<WebEntityDim> webEntityDimList = null;
+                if (dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities() != null) {
+
+                    DimCreator<WebEntityDim, WebEntity> webEntityCreator = DimCreatorFactory.getCreator(WebEntityDim.class);
+                    webEntityDimList = webEntityCreator.create(dpcRoot,
+                            dpcRoot.getProductInfo().getProducts().getProduct().getProductWebEntities());
+                    parsedDimsHolder.setWebEntityDimList(webEntityDimList);
+                }
+
+                Regions regions = dpcRoot.getProductInfo().getProducts().getProduct().getRegions();
+                if (regions != null && regions.getRegion() != null) {
+
+                    List<ProductRegionLinkDim> productRegionLinkDimList = null;
+                    DimCreator<ProductRegionLinkDim, Region> productRegionLinkCreator = DimCreatorFactory.getCreator(ProductRegionLinkDim.class);
+
+                    List<RegionDim> regionDimList = null;
+                    DimCreator<RegionDim, Region> regionDimCreator = DimCreatorFactory.getCreator(RegionDim.class);
+
+                    List<ExternalRegionMappingDim> externalRegionMappingDimList = null;
+                    DimCreator<ExternalRegionMappingDim, ExternalRegionMapping> externalRegionMappingDimCreator
+                            = DimCreatorFactory.getCreator(ExternalRegionMappingDim.class);
+
+                    for (Region region : regions.getRegion()) {
+                        if (productRegionLinkDimList == null) {
+                            productRegionLinkDimList = new ArrayList<>();
+                        }
+                        productRegionLinkDimList.add(productRegionLinkCreator.create(dpcRoot, region));
+
+                        if (regionDimList == null) {
+                            regionDimList = new ArrayList<>();
+                        }
+                        regionDimList.add(regionDimCreator.create(dpcRoot, region));
+
+                        List<ExternalRegionMappingDim> subExternalMapping = null;
+                        if (region.getExternalRegionMappings() != null && region.getExternalRegionMappings().getExternalRegionMapping() != null) {
+
+                            if (externalRegionMappingDimList == null) {
+                                externalRegionMappingDimList = new ArrayList<>();
+                            }
+                            subExternalMapping = externalRegionMappingDimCreator.create(dpcRoot,
+                                    region.getExternalRegionMappings());
+
+                            for (ExternalRegionMappingDim sub : subExternalMapping) {
+                                sub.setRegionId(region.getId());
+                            }
+
+                            externalRegionMappingDimList.addAll(subExternalMapping);
+                        }
+
+                        productMapDimList.addAll(productMapDimCreator.create(dpcRoot, region, webEntityDimList, subExternalMapping));
+                    }
+
+                    parsedDimsHolder.setProductRegionLinkDimList(productRegionLinkDimList);
+                    parsedDimsHolder.setRegionDimList(regionDimList);
+                    parsedDimsHolder.setExternalRegionMappingDimList(externalRegionMappingDimList);
+                } else {
+                    productMapDimList.addAll(productMapDimCreator.create(dpcRoot, null, webEntityDimList, null));
+                }
+
+                parsedDimsHolder.setProductMapDimList(productMapDimList);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Json parse exception", e);
         }
         return parsedDimsHolder;
     }

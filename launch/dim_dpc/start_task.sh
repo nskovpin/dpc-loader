@@ -36,43 +36,43 @@ echo 'Start create tables...'
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\product \
+-hivevar LOCATION=${OUTPUT_DIR}/product \
 -f hive/create_dim_product.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\marketingProduct \
+-hivevar LOCATION=${OUTPUT_DIR}/marketingProduct \
 -f hive/create_dim_marketing_product.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\webEntity \
+-hivevar LOCATION=${OUTPUT_DIR}/webEntity \
 -f hive/create_dim_web_entity.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\productRegionLink \
+-hivevar LOCATION=${OUTPUT_DIR}/productRegionLink \
 -f hive/create_dim_product_region_link.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\region \
+-hivevar LOCATION=${OUTPUT_DIR}/region \
 -f hive/create_dim_region.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\productMap \
+-hivevar LOCATION=${OUTPUT_DIR}/productMap \
 -f hive/create_dim_product_map.hql;
 
 hive \
 -hiveconf mapreduce.job.queuename=${QUEUE_NAME} \
 -hivevar DIGITAL=${DIGITAL} \
--hivevar LOCATION=${OUTPUT_DIR}\externalRegionMapping \
+-hivevar LOCATION=${OUTPUT_DIR}/externalRegionMapping \
 -f hive/create_dim_external_region_mapping.hql;
 
 echo 'Done.'

@@ -21,7 +21,7 @@ public class ExternalRegionMappingDimCreator implements DimCreator<ExternalRegio
         List<ExternalRegionMappingDim> webEntityDimList = new ArrayList<>();
         List<?> children = holder.getChildren();
         for(Object child: children){
-            if(child instanceof ExternalRegionMapping){
+            if(child!= null && child instanceof ExternalRegionMapping){
                 webEntityDimList.add(create(dpcRoot, (ExternalRegionMapping) child));
             }
         }

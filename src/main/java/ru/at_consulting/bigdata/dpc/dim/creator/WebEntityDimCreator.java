@@ -19,7 +19,7 @@ public class WebEntityDimCreator implements DimCreator<WebEntityDim, WebEntity> 
         List<WebEntityDim> webEntityDimList = new ArrayList<>();
         List<?> children = holder.getChildren();
         for(Object child: children){
-            if(child instanceof ProductWebEntity){
+            if(child instanceof ProductWebEntity &&((ProductWebEntity) child).getWebEntity() != null){
                 webEntityDimList.add(create(dpcRoot, ((ProductWebEntity) child).getWebEntity()));
             }
         }

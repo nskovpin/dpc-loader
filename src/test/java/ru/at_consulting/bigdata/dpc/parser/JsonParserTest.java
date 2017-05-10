@@ -40,13 +40,22 @@ public class JsonParserTest {
         ProductDim productDim = new ProductDim();
 
         productDim.setExpirationDate("2999-12-31");
+        productDim.setMarketingProductId("a");
         String date1 = productDim.stringifyExpirationDate();
         Assert.assertTrue(date1.equals("2999-12-31"));
+        String s  = productDim.stringify();
 
         productDim.setExpirationDate("2017-02-02T13:41:24.0767007+03:00");
         String date2 = productDim.stringifyExpirationDate();
         Assert.assertTrue(date2.equals("2017-02-02"));
 
+    }
+
+    @Test
+    public void stringifyTest(){
+        MarketingProductDim marketingProductDim = new MarketingProductDim();
+        String s = marketingProductDim.stringify();
+        Assert.assertNotNull(s);
     }
 
     @Test

@@ -58,6 +58,7 @@ class ExecuteTask extends SparkTestUtils with Matchers {
       val result = ClusterExecutor.execute(sc, fs, LoadTextFile,
         clusterProperties.getHdfsJsonPath,
         clusterProperties.getHdfsOutputDir,
+        null,
         timeKey, test = true)
 
       val resultProduct1 = result._1.filter(x => x._1.equals(DimEntity.EXPIRATION_DATE_INFINITY)).map(x => x._2)

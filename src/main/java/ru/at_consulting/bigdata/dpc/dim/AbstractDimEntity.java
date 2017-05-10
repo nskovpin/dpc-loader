@@ -54,9 +54,10 @@ public abstract class AbstractDimEntity implements DimEntity {
                     FieldUtils.writeField(fieldList.get(i), this, object, true);
                 }
             }
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (Exception e) {
             LOGGER.error("Can't create object with simple constructor:" + this.toString());
             e.printStackTrace();
+            System.out.println("Input string:"+input + "; Object:"+ this.toString());
         }
     }
 
@@ -111,6 +112,11 @@ public abstract class AbstractDimEntity implements DimEntity {
                                  Field field, Object value) {
         if (value == null) {
             value = nullable;
+
+            if(field.getAnnotation(NullToString.class) != null){
+                value = field.getAnnotation(NullToString.class).value();
+                nullable = field.getAnnotation(NullToString.class).value();
+            }
         }
 
         if (value instanceof List) {

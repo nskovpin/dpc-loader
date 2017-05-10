@@ -15,6 +15,7 @@ public class ProductDim extends AbstractDimEntity implements Identifiable{
 
     private String type;
 
+    @NullToString("-99")
     private String marketingProductId;
 
     private Integer isArchive;

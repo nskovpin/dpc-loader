@@ -8,7 +8,7 @@
     <controls>
 		<timeout>${coord:days(2)}</timeout>
     </controls>
-	
+	<!--
 	<datasets>
         <dataset name="dataset_json" frequency="${coord:days(1)}"
                  initial-instance="2016-09-01T00:00Z" timezone="Europe/Moscow">
@@ -21,7 +21,7 @@
             <instance>${coord:current(-1)}</instance>
         </data-in>
     </input-events>
-	
+	-->
 	<action>	
         <workflow> 	
         <app-path>${WF_APPLICATION_PATH}</app-path> 	
