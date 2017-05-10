@@ -1,7 +1,7 @@
 group 'ru.at_consulting.bigdata'
 version '1.0-SNAPSHOT'
 
-allprojects {
+allprojects (){
     apply plugin: 'maven-publish'
     apply plugin: 'idea'
     apply plugin: 'scala'
@@ -101,7 +101,7 @@ allprojects {
     }
 
     repositories {
-
+        mavenLocal()
         mavenCentral()
         maven {
             url urls.confluent
@@ -191,6 +191,7 @@ task copyDependencies(type: Copy) {
     into 'dependencies'
 }
 
+
 static containProperDependency(File file, Collection<String> collection) {
     def contains = false;
     collection.each {
@@ -200,3 +201,11 @@ static containProperDependency(File file, Collection<String> collection) {
     }
     return contains
 }
+
+task spec(dependsOn: ['testClasses'], type: JavaExec) {
+    main = 'org.scalatest.tools.Runner'
+    args = ['-R', 'build/classes/test', '-o']
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+test.dependsOn spec
