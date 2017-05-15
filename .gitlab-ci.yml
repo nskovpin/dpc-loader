@@ -1,0 +1,60 @@
+before_script:
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
+  - git submodule update --remote --merge
+  - . ./common-scripts/ci/java/before-script.sh
+stages:
+  - test
+  - build-java
+  - code-revision
+  - build-docker
+  - deploy
+  
+cache:
+  key: "$CI_PROJECT_NAME:$CI_PIPELINE_ID"
+  paths:
+    - target
+  
+maven-test:
+  stage: test
+  tags: [maven, java8, hotspot]
+  script:
+    - common-scripts/ci/java/build.sh test
+maven-build:
+  except:
+    - /^production-(?:[0-9]{1,3}\.)*[0-9]{1,3}$/
+  stage: build-java
+  tags: [maven, java8, hotspot]
+  script:
+    - common-scripts/ci/java/build.sh build
+sonar:
+  except:
+    - /^production-(?:[0-9]{1,3}\.)*[0-9]{1,3}$/
+  stage: code-revision
+  tags: [maven, java8, hotspot]
+  script:
+    - common-scripts/ci/sonarqube/sonar-code-revision.sh
+docker-build:
+  except:
+    - /^develop-.*$/
+    - /^production-(?:[0-9]{1,3}\.)*[0-9]{1,3}$/
+  stage: build-docker
+  tags: [maven, java8, hotspot]
+  script:
+    - common-scripts/ci/java/build-docker.sh
+    
+maven-deploy:
+  only:
+    - /^production-(?:[0-9]{1,3}\.)*[0-9]{1,3}$/
+  stage: deploy
+  tags: [maven, deploy]
+  script:
+    - common-scripts/ci/java/deploy.sh
+    
+docker-deploy:
+  only:
+    - /^production-(?:[0-9]{1,3}\.)*[0-9]{1,3}$/
+  stage: deploy
+  tags: [maven, deploy]
+  script:
+    - common-scripts/ci/java/deploy-docker.sh
